@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Transportadores - BookTruck Admin</title>
+    <th:block th:replace="~{fragments/head :: css}"></th:block>
+</head>
+<body>
+<div th:replace="~{fragments/navbar-admin :: nav}"></div>
+
+<main class="app-content">
+    <h1>Transportadores</h1>
+    <p class="app-subtitle">Todos los transportadores registrados en la plataforma.</p>
+
+    <div class="alert alert-success" th:if="${exito}" th:text="${exito}"></div>
+    <div class="alert alert-error" th:if="${error}" th:text="${error}"></div>
+
+    <form th:action="@{/admin/transportadores}" method="get" class="filter-bar filter-bar-grid filter-bar-compacta">
+        <div class="filter-group">
+            <label for="verificacion">Verificación</label>
+            <select id="verificacion" name="verificacion" class="form-control">
+                <option value="">Todas</option>
+                <option value="PENDIENTE" th:selected="${verificacion != null and verificacion.name() == 'PENDIENTE'}">Pendiente</option>
+                <option value="APROBADO" th:selected="${verificacion != null and verificacion.name() == 'APROBADO'}">Aprobado</option>
+                <option value="RECHAZADO" th:selected="${verificacion != null and verificacion.name() == 'RECHAZADO'}">Rechazado</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label for="disponible">Disponible</label>
+            <select id="disponible" name="disponible" class="form-control">
+                <option value="">Todos</option>
+                <option value="true" th:selected="${disponible == true}">Sí</option>
+                <option value="false" th:selected="${disponible == false}">No</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label for="licencia">Licencia</label>
+            <select id="licencia" name="licencia" class="form-control">
+                <option value="">Todas</option>
+                <option th:each="l : ${ {'C1', 'C2', 'C3'} }" th:value="${l}" th:text="${l}" th:selected="${l == licencia}"></option>
+            </select>
+        </div>
+        <div class="filter-group filter-group-ancho">
+            <label for="busqueda">Nombre o cédula</label>
+            <input type="text" id="busqueda" name="busqueda" class="form-control" th:value="${busqueda}" placeholder="Buscar por nombre o cédula">
+        </div>
+        <button type="submit" class="btn btn-primary">Filtrar</button>
+    </form>
+    <div th:replace="~{fragments/filtros :: resumen(${paginacion.total}, ${total}, ${hayFiltros}, '/admin/transportadores', 'transportadores')}"></div>
+
+    <section class="app-section">
+        <div class="table-responsive">
+        <table class="app-table" th:if="${not #lists.isEmpty(transportadores)}">
+            <thead>
+            <tr>
+                <th>Transportador</th>
+                <th>Cuenta</th>
+                <th>Verificación</th>
+                <th>Vehículos</th>
+                <th>Acciones</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="transportador : ${transportadores}"
+                th:with="estadoDocs=${@verificacionService.estadoTransportador(transportador).name()}">
+                <td>
+                    <span class="celda-principal" th:text="${transportador.nombreCompleto}"></span>
+                    <span class="celda-secundaria" th:text="${transportador.usuario.email}"></span>
+                </td>
+                <td th:insert="~{fragments/badge :: pill(${transportador.usuario.activo} ? 'Activa' : 'Inactiva')}"></td>
+                <td th:insert="~{fragments/badge :: pill(${estadoDocs})}"></td>
+                <td th:text="${vehiculosPorTransportador.get(transportador.id)}"></td>
+                <td>
+                    <div class="celda-acciones">
+                        <button type="button" class="btn-link js-ver-detalle"
+                                th:attr="data-detalle=${'detalle-transportador-' + transportador.id}"
+                                data-detalle-titulo="Detalles del transportador">Ver detalles</button>
+                        <a th:href="@{/admin/transportadores/{id}/verificar(id=${transportador.id})}">Revisar documentos</a>
+                    </div>
+                    <template th:id="${'detalle-transportador-' + transportador.id}">
+                        <dl class="detalle-lista">
+                            <dt>Nombre completo</dt>
+                            <dd th:text="${transportador.nombreCompleto}"></dd>
+                            <dt>Cédula</dt>
+                            <dd th:text="${transportador.cedula}"></dd>
+                            <dt>Email</dt>
+                            <dd th:text="${transportador.usuario.email}"></dd>
+                            <dt>Teléfono</dt>
+                            <dd th:text="${transportador.telefono}"></dd>
+                            <dt>Licencia</dt>
+                            <dd th:text="${transportador.licencia}"></dd>
+                            <dt>Disponible</dt>
+                            <dd th:insert="~{fragments/badge :: pill(${transportador.disponible} ? 'Sí' : 'No')}"></dd>
+                            <dt>Cuenta</dt>
+                            <dd th:insert="~{fragments/badge :: pill(${transportador.usuario.activo} ? 'Activa' : 'Inactiva')}"></dd>
+                            <dt>Verificación</dt>
+                            <dd>
+                                <span th:insert="~{fragments/badge :: pill(${estadoDocs})}"></span>
+                                <span class="celda-secundaria" th:if="${estadoDocs == 'RECHAZADO' and transportador.motivoRechazo != null}"
+                                      th:text="${'Motivo: ' + transportador.motivoRechazo}"></span>
+                            </dd>
+                            <dt>Vehículos</dt>
+                            <dd th:text="${vehiculosPorTransportador.get(transportador.id)}"></dd>
+                        </dl>
+                        <div class="modal-actions">
+                            <a class="btn btn-primary" th:href="@{/admin/transportadores/{id}/verificar(id=${transportador.id})}">Revisar documentos</a>
+                        </div>
+                    </template>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+        </div>
+        <nav th:replace="~{fragments/paginacion :: pager(${paginacion})}"></nav>
+        <div class="empty-state" th:if="${#lists.isEmpty(transportadores) and not hayFiltros}">
+            <p>No hay transportadores registrados.</p>
+        </div>
+        <th:block th:if="${#lists.isEmpty(transportadores) and hayFiltros}">
+            <div th:replace="~{fragments/filtros :: sin-resultados('/admin/transportadores')}"></div>
+        </th:block>
+    </section>
+    <footer th:replace="~{fragments/footer-app :: footer}"></footer>
+</main>
+<div th:replace="~{fragments/detalle-modal :: modal}"></div>
+<script th:src="@{/js/detalle-modal.js}"></script>
+</body>
+</html>

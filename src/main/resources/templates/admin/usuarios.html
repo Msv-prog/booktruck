@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Usuarios - BookTruck Admin</title>
+    <th:block th:replace="~{fragments/head :: css}"></th:block>
+</head>
+<body>
+<div th:replace="~{fragments/navbar-admin :: nav}"></div>
+
+<main class="app-content">
+    <h1>Usuarios</h1>
+    <p class="app-subtitle">Todas las cuentas registradas en la plataforma.</p>
+
+    <div class="alert alert-success" th:if="${param.adminCreado}">Administrador creado correctamente.</div>
+    <div class="alert alert-error" th:if="${error}" th:text="${error}"></div>
+    <div class="alert alert-success" th:if="${exito}" th:text="${exito}"></div>
+
+    <p class="app-back-link"><a th:href="@{/admin/usuarios/nuevo-admin}">+ Crear administrador</a></p>
+
+    <form th:action="@{/admin/usuarios}" method="get" class="filter-bar filter-bar-grid filter-bar-compacta">
+        <div class="filter-group">
+            <label for="rol">Rol</label>
+            <select id="rol" name="rol" class="form-control">
+                <option value="">Todos</option>
+                <option value="EMPRESA" th:selected="${rol != null and rol.name() == 'EMPRESA'}">Empresa</option>
+                <option value="TRANSPORTADOR" th:selected="${rol != null and rol.name() == 'TRANSPORTADOR'}">Transportador</option>
+                <option value="ADMINISTRADOR" th:selected="${rol != null and rol.name() == 'ADMINISTRADOR'}">Administrador</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label for="activo">Estado</label>
+            <select id="activo" name="activo" class="form-control">
+                <option value="">Todos</option>
+                <option value="true" th:selected="${activo == true}">Activo</option>
+                <option value="false" th:selected="${activo == false}">Inactivo</option>
+            </select>
+        </div>
+        <div class="filter-group filter-group-ancho">
+            <label for="correo">Correo</label>
+            <input type="text" id="correo" name="correo" class="form-control" th:value="${correo}" placeholder="Buscar por correo">
+        </div>
+        <button type="submit" class="btn btn-primary">Filtrar</button>
+    </form>
+    <div th:replace="~{fragments/filtros :: resumen(${paginacion.total}, ${total}, ${hayFiltros}, '/admin/usuarios', 'usuarios')}"></div>
+
+    <section class="app-section">
+        <div class="table-responsive">
+        <table class="app-table" th:if="${not #lists.isEmpty(usuarios)}">
+            <thead>
+            <tr>
+                <th>Email</th>
+                <th>Rol</th>
+                <th>Estado</th>
+                <th>Fecha de creación</th>
+                <th>Acción</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="usuario : ${usuarios}">
+                <td>
+                    <div class="persona">
+                        <span th:replace="~{fragments/avatar :: avatar(${usuario}, ${#strings.toUpperCase(#strings.substring(usuario.email, 0, 1))}, 'chico')}"></span>
+                        <span th:text="${usuario.email}"></span>
+                    </div>
+                </td>
+                <td th:text="${usuario.rol}"></td>
+                <td th:insert="~{fragments/badge :: pill(${usuario.activo} ? 'Activo' : 'Inactivo')}"></td>
+                <td th:text="${#temporals.format(usuario.fechaCreacion, 'dd/MM/yyyy HH:mm')}"></td>
+                <td>
+                    <form th:if="${usuario.fotoRuta != null}" th:action="@{/admin/usuarios/{id}/foto/quitar(id=${usuario.id})}" method="post"
+                          class="js-confirm" data-confirm-message="¿Quitar la foto de perfil de este usuario? Se mostrarán sus iniciales.">
+                        <button type="submit" class="btn-link">Quitar foto</button>
+                    </form>
+                    <span th:if="${usuario.email == #authentication.name}">(tú)</span>
+                    <form th:if="${usuario.email != #authentication.name}"
+                          th:action="@{/admin/usuarios/{id}/estado(id=${usuario.id})}" method="post"
+                          class="js-confirm" data-confirm-message="¿Confirmas cambiar el estado de este usuario?">
+                        <button type="submit" class="btn-link" th:text="${usuario.activo} ? 'Desactivar' : 'Activar'"></button>
+                    </form>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+        </div>
+        <nav th:replace="~{fragments/paginacion :: pager(${paginacion})}"></nav>
+        <div class="empty-state" th:if="${#lists.isEmpty(usuarios) and not hayFiltros}">
+            <p>No hay usuarios registrados.</p>
+        </div>
+        <th:block th:if="${#lists.isEmpty(usuarios) and hayFiltros}">
+            <div th:replace="~{fragments/filtros :: sin-resultados('/admin/usuarios')}"></div>
+        </th:block>
+    </section>
+    <footer th:replace="~{fragments/footer-app :: footer}"></footer>
+</main>
+<div th:replace="~{fragments/confirm-modal :: modal}"></div>
+<script th:src="@{/js/confirm.js}"></script>
+</body>
+</html>

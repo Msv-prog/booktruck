@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="modal" id="detalle-modal-overlay" class="modal-overlay">
+    <div class="modal-box modal-box-detalle" role="dialog" aria-modal="true" aria-labelledby="detalle-modal-titulo">
+        <div class="detalle-modal-header">
+            <h2 id="detalle-modal-titulo">Detalles</h2>
+            <button type="button" id="detalle-modal-cerrar" class="detalle-modal-cerrar" aria-label="Cerrar">&times;</button>
+        </div>
+        <div id="detalle-modal-cuerpo"></div>
+    </div>
+</div>
+
+<!-- Filas <dt>/<dd> reutilizables; se insertan dentro de un <dl class="detalle-lista"> -->
+
+<th:block th:fragment="filas-carga(carga)">
+    <dt>Origen</dt>
+    <dd>
+        <span th:text="${carga.origen}"></span>
+        <span class="celda-secundaria" th:text="${carga.direccionOrigen}"></span>
+    </dd>
+    <dt>Destino</dt>
+    <dd>
+        <span th:text="${carga.destino}"></span>
+        <span class="celda-secundaria" th:text="${carga.direccionDestino}"></span>
+    </dd>
+    <dt>Tipo de mercancía</dt>
+    <dd th:text="${carga.tipoMercancia}"></dd>
+    <dt>Peso</dt>
+    <dd th:text="${carga.peso + ' ton'}"></dd>
+    <dt>Carrocería requerida</dt>
+    <dd th:text="${carga.carroceriaTexto}"></dd>
+    <dt>Precio ofrecido</dt>
+    <dd th:text="${'$' + #numbers.formatDecimal(carga.precioOfrecido, 1, 'POINT', 0, 'COMMA')}"></dd>
+    <dt>Recolección</dt>
+    <dd th:text="${#temporals.format(carga.fechaRecoleccion, 'dd/MM/yyyy HH:mm')}"></dd>
+    <dt>Publicada</dt>
+    <dd th:text="${#temporals.format(carga.fechaPublicacion, 'dd/MM/yyyy HH:mm')}"></dd>
+</th:block>
+
+<th:block th:fragment="filas-vehiculo(vehiculo)">
+    <dt>Vehículo</dt>
+    <dd>
+        <span th:text="${vehiculo.placa + ' · ' + (vehiculo.tipoVehiculo != null and vehiculo.tipoVehiculo.name() == 'ARTICULADO' ? 'Articulado' : 'Sencillo')}"></span>
+        <span class="celda-secundaria"
+              th:text="${vehiculo.marca + ' · ' + vehiculo.tipoCarroceria.etiqueta + ' · ' + vehiculo.capacidadToneladas + ' ton'
+                         + (vehiculo.clasePeso != null ? ' · ' + vehiculo.clasePeso : '')}"></span>
+    </dd>
+</th:block>
+
+<!-- verComision: true para admin y transportador; la empresa solo ve el monto acordado -->
+<th:block th:fragment="filas-viaje(viaje, verComision)">
+    <dt>Empresa</dt>
+    <dd th:text="${viaje.carga.empresa.razonSocial}"></dd>
+    <dt>Transportador</dt>
+    <dd>
+        <span th:text="${viaje.transportador.nombreCompleto}"></span>
+        <span class="celda-secundaria" th:text="${viaje.transportador.telefono}"></span>
+    </dd>
+    <th:block th:replace="~{fragments/detalle-modal :: filas-vehiculo(${viaje.vehiculo})}"></th:block>
+    <dt>Origen</dt>
+    <dd>
+        <span th:text="${viaje.carga.origen}"></span>
+        <span class="celda-secundaria" th:text="${viaje.carga.direccionOrigen}"></span>
+    </dd>
+    <dt>Destino</dt>
+    <dd>
+        <span th:text="${viaje.carga.destino}"></span>
+        <span class="celda-secundaria" th:text="${viaje.carga.direccionDestino}"></span>
+    </dd>
+    <dt>Mercancía</dt>
+    <dd th:text="${viaje.carga.tipoMercancia + ' · ' + viaje.carga.peso + ' ton'}"></dd>
+    <th:block th:if="${viaje.oferta != null}">
+        <dt>Monto acordado</dt>
+        <dd th:text="${'$' + #numbers.formatDecimal(viaje.oferta.monto, 1, 'POINT', 0, 'COMMA')}"></dd>
+    </th:block>
+    <th:block th:if="${verComision and viaje.comisionMonto != null}">
+        <dt th:text="${'Comisión BookTruck (' + #numbers.formatDecimal(viaje.comisionPorcentaje, 1, 'POINT', 0, 'COMMA') + '%)'}">Comisión BookTruck</dt>
+        <dd th:text="${'$' + #numbers.formatDecimal(viaje.comisionMonto, 1, 'POINT', 0, 'COMMA')}"></dd>
+        <dt>Neto transportador</dt>
+        <dd th:text="${'$' + #numbers.formatDecimal(viaje.netoTransportador, 1, 'POINT', 0, 'COMMA')}"></dd>
+    </th:block>
+    <dt>Estado</dt>
+    <dd>
+        <span th:insert="~{fragments/badge :: pill(${viaje.estado.name()})}"></span>
+        <span th:insert="~{fragments/motivo-cancelacion :: texto(${viaje.motivoCancelacion})}"></span>
+        <span class="celda-secundaria" th:if="${viaje.canceladoPor != null}"
+              th:text="${'Cancelado por ' + (viaje.canceladoPor.name() == 'EMPRESA' ? 'la empresa' : (viaje.canceladoPor.name() == 'TRANSPORTADOR' ? 'el transportador' : 'un administrador'))}"></span>
+    </dd>
+    <dt>Recolección</dt>
+    <dd th:text="${#temporals.format(viaje.carga.fechaRecoleccion, 'dd/MM/yyyy HH:mm')}"></dd>
+    <dt>Inicio</dt>
+    <dd th:text="${viaje.fechaInicio != null ? #temporals.format(viaje.fechaInicio, 'dd/MM/yyyy HH:mm') : '-'}"></dd>
+    <dt>Fin</dt>
+    <dd th:text="${viaje.fechaFin != null ? #temporals.format(viaje.fechaFin, 'dd/MM/yyyy HH:mm') : '-'}"></dd>
+</th:block>
+</body>
+</html>

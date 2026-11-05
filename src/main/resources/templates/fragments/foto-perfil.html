@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<!-- Subir o quitar la foto de perfil / logo. base: "/empresa" o "/transportador"; etiqueta: "logo" o "foto" -->
+<div th:fragment="editor(usuario, iniciales, base, etiqueta)" class="foto-perfil">
+    <span th:replace="~{fragments/avatar :: avatar(${usuario}, ${iniciales}, 'grande')}"></span>
+    <div class="foto-perfil-acciones">
+        <form th:action="@{${base + '/perfil/foto'}}" method="post" enctype="multipart/form-data">
+            <input type="file" name="foto" class="form-control" accept=".jpg,.jpeg,.png" data-max-mb="2" required
+                   th:attr="aria-label=${'Elegir ' + etiqueta}">
+            <button type="submit" class="btn btn-primary btn-auto"
+                    th:text="${usuario.fotoRuta != null ? 'Cambiar ' + etiqueta : 'Subir ' + etiqueta}">Subir</button>
+        </form>
+        <small class="app-subtitle">JPG o PNG, máximo 2 MB. Si no subes una, se muestran tus iniciales.</small>
+        <form th:if="${usuario.fotoRuta != null}" th:action="@{${base + '/perfil/foto/quitar'}}" method="post">
+            <button type="submit" class="btn-link" th:text="${'Quitar ' + etiqueta}">Quitar</button>
+        </form>
+    </div>
+</div>
+</body>
+</html>

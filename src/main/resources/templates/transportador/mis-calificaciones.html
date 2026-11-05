@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Mis calificaciones - BookTruck</title>
+    <th:block th:replace="~{fragments/head :: css}"></th:block>
+</head>
+<body>
+<div th:replace="~{fragments/navbar-transportador :: nav}"></div>
+
+<main class="app-content">
+    <h1>Mis calificaciones</h1>
+    <p class="app-subtitle">Calificaciones que las empresas te han dejado después de cada viaje.</p>
+
+    <div class="profile-rating">
+        <div th:replace="~{fragments/calificacion :: resumen(${resumenCalificacion})}"></div>
+    </div>
+
+    <section class="app-section">
+        <div class="table-responsive">
+        <table class="app-table" th:if="${not #lists.isEmpty(calificaciones)}">
+            <thead>
+            <tr>
+                <th>Viaje</th>
+                <th>Empresa</th>
+                <th>Puntuación</th>
+                <th>Comentario</th>
+                <th>Fecha</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="calificacion : ${calificaciones}">
+                <td th:text="${calificacion.viaje.carga.origen} + ' → ' + ${calificacion.viaje.carga.destino}"></td>
+                <td th:text="${calificacion.empresa.razonSocial}"></td>
+                <td th:text="${calificacion.puntuacion} + ' / 5'"></td>
+                <td th:text="${calificacion.comentario}"></td>
+                <td th:text="${#temporals.format(calificacion.fecha, 'dd/MM/yyyy HH:mm')}"></td>
+            </tr>
+            </tbody>
+        </table>
+        </div>
+        <div class="empty-state" th:if="${#lists.isEmpty(calificaciones)}">
+            <p>Todavía no has recibido calificaciones.</p>
+        </div>
+    </section>
+    <footer th:replace="~{fragments/footer-app :: footer}"></footer>
+</main>
+</body>
+</html>

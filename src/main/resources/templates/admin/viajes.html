@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Viajes - BookTruck Admin</title>
+    <th:block th:replace="~{fragments/head :: css}"></th:block>
+</head>
+<body>
+<div th:replace="~{fragments/navbar-admin :: nav}"></div>
+
+<main class="app-content">
+    <h1>Viajes</h1>
+    <p class="app-subtitle">Todos los viajes generados en la plataforma.</p>
+
+    <div class="alert alert-error" th:if="${param.error}">No fue posible completar esa acción.</div>
+    <div class="alert alert-error" th:if="${error}" th:text="${error}"></div>
+    <div class="alert alert-success" th:if="${exito}" th:text="${exito}"></div>
+
+    <form th:action="@{/admin/viajes}" method="get" class="filter-bar filter-bar-grid filter-bar-compacta">
+        <div class="filter-group">
+            <label for="estado">Estado</label>
+            <select id="estado" name="estado" class="form-control">
+                <option value="" th:selected="${estadoSeleccionado == null}">Todos</option>
+                <option value="PROGRAMADO" th:selected="${estadoSeleccionado != null and estadoSeleccionado.name() == 'PROGRAMADO'}">Programado</option>
+                <option value="EN_CURSO" th:selected="${estadoSeleccionado != null and estadoSeleccionado.name() == 'EN_CURSO'}">En curso</option>
+                <option value="ENTREGADO" th:selected="${estadoSeleccionado != null and estadoSeleccionado.name() == 'ENTREGADO'}">Entregado</option>
+                <option value="FINALIZADO" th:selected="${estadoSeleccionado != null and estadoSeleccionado.name() == 'FINALIZADO'}">Finalizado</option>
+                <option value="CANCELADO" th:selected="${estadoSeleccionado != null and estadoSeleccionado.name() == 'CANCELADO'}">Cancelado</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label for="empresaId">Empresa</label>
+            <select id="empresaId" name="empresaId" class="form-control">
+                <option value="">Todas</option>
+                <option th:each="e : ${empresas}" th:value="${e.id}" th:text="${e.razonSocial}" th:selected="${e.id == empresaId}"></option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label for="transportadorId">Transportador</label>
+            <select id="transportadorId" name="transportadorId" class="form-control">
+                <option value="">Todos</option>
+                <option th:each="t : ${transportadores}" th:value="${t.id}" th:text="${t.nombreCompleto}" th:selected="${t.id == transportadorId}"></option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label for="desde">Recolección desde</label>
+            <input type="date" id="desde" name="desde" class="form-control" th:value="${desde}">
+        </div>
+        <div class="filter-group">
+            <label for="hasta">Recolección hasta</label>
+            <input type="date" id="hasta" name="hasta" class="form-control" th:value="${hasta}">
+        </div>
+        <button type="submit" class="btn btn-primary">Filtrar</button>
+    </form>
+    <div th:replace="~{fragments/filtros :: resumen(${paginacion.total}, ${total}, ${hayFiltros}, '/admin/viajes', 'viajes')}"></div>
+
+    <section class="app-section">
+        <div class="table-responsive">
+        <table class="app-table" th:if="${not #lists.isEmpty(viajes)}">
+            <thead>
+            <tr>
+                <th>Ruta</th>
+                <th>Transportador</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="viaje : ${viajes}">
+                <td>
+                    <span class="celda-principal" th:text="${viaje.carga.origen + ' → ' + viaje.carga.destino}"></span>
+                    <span class="celda-secundaria" th:text="${viaje.carga.empresa.razonSocial}"></span>
+                </td>
+                <td>
+                    <span class="celda-principal" th:text="${viaje.transportador.nombreCompleto}"></span>
+                    <span class="celda-secundaria" th:text="${viaje.vehiculo.placa}"></span>
+                </td>
+                <td>
+                    <span th:insert="~{fragments/badge :: pill(${viaje.estado.name()})}"></span>
+                    <span th:insert="~{fragments/motivo-cancelacion :: texto(${viaje.motivoCancelacion})}"></span>
+                    <span class="celda-secundaria" th:if="${viaje.canceladoPor != null}"
+                          th:text="${'Cancelado por: ' + (viaje.canceladoPor.name() == 'EMPRESA' ? 'la empresa' : (viaje.canceladoPor.name() == 'TRANSPORTADOR' ? 'el transportador' : 'un administrador'))}"></span>
+                    <span class="celda-secundaria texto-error" th:if="${viaje.atrasado}">Atrasado: no se ha iniciado</span>
+                </td>
+                <td>
+                    <div class="celda-acciones">
+                        <button type="button" class="btn-link js-ver-detalle"
+                                th:attr="data-detalle=${'detalle-viaje-' + viaje.id}"
+                                data-detalle-titulo="Detalles del viaje">Ver detalles</button>
+                        <a th:href="@{/admin/viajes/{id}(id=${viaje.id})}">Ver viaje</a>
+                        <a th:href="@{/admin/viajes/{id}/seguimiento(id=${viaje.id})}">Seguimiento</a>
+                        <a th:if="${viaje.tienePruebaEntrega}" target="_blank"
+                           th:href="@{/admin/viajes/{id}/prueba-entrega(id=${viaje.id})}">Prueba de entrega</a>
+                        <form th:if="${viaje.estado.name() == 'PROGRAMADO' or viaje.estado.name() == 'EN_CURSO'}"
+                              th:action="@{/admin/viajes/{id}/cancelar(id=${viaje.id})}" method="post"
+                              class="js-confirm" data-confirm-message="¿Confirmas cancelar este viaje como administrador?">
+                            <button type="submit" class="btn-link">Cancelar</button>
+                        </form>
+                    </div>
+                    <template th:id="${'detalle-viaje-' + viaje.id}">
+                        <dl class="detalle-lista">
+                            <th:block th:replace="~{fragments/detalle-modal :: filas-viaje(${viaje}, true)}"></th:block>
+                        </dl>
+                    </template>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+        </div>
+        <nav th:replace="~{fragments/paginacion :: pager(${paginacion})}"></nav>
+        <div class="empty-state" th:if="${#lists.isEmpty(viajes) and not hayFiltros}">
+            <p>Todavía no hay viajes.</p>
+        </div>
+        <th:block th:if="${#lists.isEmpty(viajes) and hayFiltros}">
+            <div th:replace="~{fragments/filtros :: sin-resultados('/admin/viajes')}"></div>
+        </th:block>
+    </section>
+    <footer th:replace="~{fragments/footer-app :: footer}"></footer>
+</main>
+<div th:replace="~{fragments/confirm-modal :: modal}"></div>
+<div th:replace="~{fragments/detalle-modal :: modal}"></div>
+<script th:src="@{/js/confirm.js}"></script>
+<script th:src="@{/js/detalle-modal.js}"></script>
+</body>
+</html>

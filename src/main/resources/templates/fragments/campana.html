@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<!-- Campanita flotante (arriba a la derecha) con las últimas notificaciones.
+     base: "/empresa" o "/transportador". Los datos se calculan fuera: Thymeleaf no permite llamar beans dentro de ~{...} -->
+<div th:fragment="campana(base, recientes, noLeidas)" class="campana">
+    <button type="button" class="campana-boton" aria-haspopup="true" aria-expanded="false" aria-controls="campana-panel"
+            th:attr="aria-label=${noLeidas > 0 ? 'Notificaciones (' + noLeidas + ' sin leer)' : 'Notificaciones'}">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.7 21a2 2 0 0 1-3.4 0"></path></svg>
+        <span class="campana-contador" th:if="${noLeidas > 0}" th:text="${noLeidas > 9 ? '9+' : noLeidas}"></span>
+    </button>
+    <div id="campana-panel" class="campana-panel" hidden>
+        <div class="campana-cabecera">
+            <strong>Notificaciones</strong>
+            <form th:if="${noLeidas > 0}" th:action="@{${base + '/notificaciones/leidas'}}" method="post">
+                <button type="submit" class="btn-link">Marcar todas como leídas</button>
+            </form>
+        </div>
+        <ul class="lista-notificaciones" th:if="${not #lists.isEmpty(recientes)}">
+            <li th:each="n : ${recientes}" th:classappend="${n.leida} ? '' : 'no-leida'">
+                <form th:action="@{${base + '/notificaciones/' + n.id + '/abrir'}}" method="post">
+                    <button type="submit" class="notificacion-boton">
+                        <span class="notificacion-mensaje" th:text="${n.mensaje}"></span>
+                        <span class="celda-secundaria" th:text="${#temporals.format(n.fecha, 'dd/MM/yyyy HH:mm')}"></span>
+                    </button>
+                </form>
+            </li>
+        </ul>
+        <p class="campana-vacia" th:if="${#lists.isEmpty(recientes)}">No tienes notificaciones todavía.</p>
+        <a class="campana-ver-todas" th:href="@{${base + '/notificaciones'}}">Ver todas</a>
+    </div>
+</div>
+</body>
+</html>

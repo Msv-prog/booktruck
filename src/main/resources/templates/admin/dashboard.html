@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Dashboard - BookTruck Admin</title>
+    <th:block th:replace="~{fragments/head :: css}"></th:block>
+</head>
+<body>
+<div th:replace="~{fragments/navbar-admin :: nav}"></div>
+
+<main class="app-content">
+    <h1>Panel de administración</h1>
+    <p class="app-subtitle">Resumen general de la plataforma BookTruck.</p>
+
+    <th:block th:with="documentosPorRevisar=${@verificacionService.contarDocumentosPorRevisar()},
+                       empresasPorRevisar=${@verificacionService.contarEmpresasPorRevisar()},
+                       transportadoresPorRevisar=${@verificacionService.contarTransportadoresPorRevisar()},
+                       vehiculosPorRevisar=${@verificacionService.contarVehiculosPorRevisar()}">
+        <div class="alert alert-advertencia" role="status" th:if="${documentosPorRevisar > 0}">
+            <strong th:text="${'Tienes ' + documentosPorRevisar + ' documento(s) de verificación por revisar.'}"></strong>
+            Hasta que los apruebes, esas cuentas o vehículos no pueden operar:
+            <a th:if="${empresasPorRevisar > 0}" th:href="@{/admin/empresas}" th:text="${empresasPorRevisar + ' empresa(s)'}"></a>
+            <span th:if="${empresasPorRevisar > 0 and transportadoresPorRevisar + vehiculosPorRevisar > 0}">·</span>
+            <a th:if="${transportadoresPorRevisar > 0}" th:href="@{/admin/transportadores}" th:text="${transportadoresPorRevisar + ' transportador(es)'}"></a>
+            <span th:if="${transportadoresPorRevisar > 0 and vehiculosPorRevisar > 0}">·</span>
+            <a th:if="${vehiculosPorRevisar > 0}" th:href="@{/admin/vehiculos}" th:text="${vehiculosPorRevisar + ' vehículo(s)'}"></a>
+        </div>
+    </th:block>
+
+    <th:block th:with="porVencer=${@verificacionService.proximosAVencer()}">
+    <section class="app-section" th:unless="${#lists.isEmpty(porVencer)}">
+        <h2>Documentos vencidos o por vencer (próximos 30 días)</h2>
+        <div class="table-responsive">
+        <table class="app-table">
+            <thead>
+            <tr>
+                <th>Documento</th>
+                <th>De</th>
+                <th>Vence</th>
+                <th>Acciones</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="doc : ${porVencer}">
+                <td th:text="${doc.tipo.etiqueta}"></td>
+                <td th:text="${doc.empresa != null ? doc.empresa.razonSocial
+                             : (doc.transportador != null ? doc.transportador.nombreCompleto
+                             : 'Vehículo ' + doc.vehiculo.placa + ' (' + doc.vehiculo.transportador.nombreCompleto + ')')}"></td>
+                <td>
+                    <span th:text="${#temporals.format(doc.fechaVencimiento, 'dd/MM/yyyy')}"></span>
+                    <span th:replace="~{fragments/documentos :: estado(${doc})}"></span>
+                </td>
+                <td>
+                    <a th:href="@{${doc.empresa != null ? '/admin/empresas/' + doc.empresa.id + '/verificar'
+                                  : (doc.transportador != null ? '/admin/transportadores/' + doc.transportador.id + '/verificar'
+                                  : '/admin/vehiculos/' + doc.vehiculo.id + '/verificar')}}">Ver</a>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+        </div>
+    </section>
+    </th:block>
+
+    <div class="stat-grid">
+        <div class="stat-card">
+            <span class="stat-value" th:text="${resumen.totalUsuarios}"></span>
+            <span class="stat-label">Usuarios</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-value" th:text="${resumen.totalEmpresas}"></span>
+            <span class="stat-label">Empresas</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-value" th:text="${resumen.totalTransportadores}"></span>
+            <span class="stat-label">Transportadores</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-value" th:text="${resumen.totalVehiculos}"></span>
+            <span class="stat-label">Vehículos</span>
+        </div>
+    </div>
+
+    <div class="stat-grid">
+        <div class="stat-card">
+            <span class="stat-value" th:text="${resumen.totalCargas}"></span>
+            <span class="stat-label">Cargas totales</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-value" th:text="${resumen.cargasActivas}"></span>
+            <span class="stat-label">Cargas activas</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-value" th:text="${resumen.totalOfertas}"></span>
+            <span class="stat-label">Ofertas totales</span>
+        </div>
+    </div>
+
+    <div class="stat-grid">
+        <div class="stat-card">
+            <span class="stat-value" th:text="${resumen.totalViajes}"></span>
+            <span class="stat-label">Viajes totales</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-value" th:text="${resumen.viajesEnCurso}"></span>
+            <span class="stat-label">Viajes en curso</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-value" th:text="${resumen.totalCalificaciones}"></span>
+            <span class="stat-label">Calificaciones</span>
+        </div>
+    </div>
+    <section class="grafica-grid">
+        <div class="grafica-tarjeta">
+            <h2>Viajes finalizados por mes</h2>
+            <div class="grafica-lienzo"><canvas data-grafica="viajesPorMes" data-tipo="barras" aria-label="Viajes finalizados por mes"></canvas></div>
+            <p class="grafica-vacia">Aún no hay viajes finalizados en los últimos 6 meses.</p>
+        </div>
+        <div class="grafica-tarjeta">
+            <h2>Comisiones de BookTruck por mes</h2>
+            <div class="grafica-lienzo"><canvas data-grafica="comisionesPorMes" data-tipo="linea" data-dinero aria-label="Comisiones por mes"></canvas></div>
+            <p class="grafica-vacia">Aún no hay comisiones en los últimos 6 meses.</p>
+        </div>
+        <div class="grafica-tarjeta">
+            <h2>Cargas por estado</h2>
+            <div class="grafica-lienzo"><canvas data-grafica="cargasPorEstado" data-tipo="dona" aria-label="Cargas por estado"></canvas></div>
+            <p class="grafica-vacia">Todavía no hay cargas.</p>
+        </div>
+    </section>    <footer th:replace="~{fragments/footer-app :: footer}"></footer>
+</main>
+<script th:inline="javascript">window.datosGraficas = /*[[${graficas}]]*/ {};</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script th:src="@{/js/graficas.js}"></script></body>
+</html>

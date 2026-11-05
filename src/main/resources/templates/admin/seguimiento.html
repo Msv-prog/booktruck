@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Seguimiento - BookTruck Admin</title>
+    <th:block th:replace="~{fragments/head :: css}"></th:block>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+</head>
+<body>
+<div th:replace="~{fragments/navbar-admin :: nav}"></div>
+
+<main class="app-content">
+    <nav th:replace="~{fragments/breadcrumb :: trail(@{/admin/viajes}, 'Viajes', 'Seguimiento')}"></nav>
+    <h1>Seguimiento del viaje</h1>
+    <p class="app-subtitle">
+        Carga: <span th:text="${viaje.carga.origen}"></span> &rarr; <span th:text="${viaje.carga.destino}"></span>
+        &middot; Empresa: <span th:text="${viaje.carga.empresa.razonSocial}"></span>
+        &middot; Transportador: <span th:text="${viaje.transportador.nombreCompleto}"></span>
+        &middot; Vehículo: <span th:text="${viaje.vehiculo.placa}"></span>
+    </p>
+
+    <div th:insert="~{fragments/viaje-timeline :: stepper(${viaje})}"></div>
+
+    <div id="mapa" class="map-container" th:if="${not #lists.isEmpty(puntos)}"></div>
+    <p th:if="${#lists.isEmpty(puntos)}">No se ha registrado ninguna ubicación para este viaje.</p>
+
+    <section class="app-section" th:if="${not #lists.isEmpty(puntos)}">
+        <div class="table-responsive">
+        <table class="app-table" id="tabla-puntos">
+            <thead>
+            <tr>
+                <th>Fecha y hora</th>
+                <th>Latitud</th>
+                <th>Longitud</th>
+                <th>Observación</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="punto : ${puntos}"
+                th:attr="data-lat=${punto.latitud}, data-lon=${punto.longitud}, data-fecha=${#temporals.format(punto.fechaHora, 'dd/MM/yyyy HH:mm:ss')}, data-obs=${punto.observacion}">
+                <td th:text="${#temporals.format(punto.fechaHora, 'dd/MM/yyyy HH:mm:ss')}"></td>
+                <td th:text="${punto.latitud}"></td>
+                <td th:text="${punto.longitud}"></td>
+                <td th:text="${punto.observacion}"></td>
+            </tr>
+            </tbody>
+        </table>
+        </div>
+    </section>
+
+    <p class="app-back-link"><a th:href="@{/admin/viajes}">&larr; Volver a viajes</a></p>
+    <footer th:replace="~{fragments/footer-app :: footer}"></footer>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script th:src="@{/js/mapa-seguimiento.js}"></script>
+</body>
+</html>

@@ -1,0 +1,132 @@
+﻿<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Reportes - BookTruck Admin</title>
+    <th:block th:replace="~{fragments/head :: css}"></th:block>
+</head>
+<body>
+<div th:replace="~{fragments/navbar-admin :: nav}"></div>
+
+<main class="app-content">
+    <h1>Reportes</h1>
+    <p class="app-subtitle">Resumen de actividad de la plataforma, filtrable por rango de fechas.</p>
+
+    <form th:action="@{/admin/reportes}" method="get" class="filter-bar">
+        <label for="desde">Desde</label>
+        <input type="date" id="desde" name="desde" th:value="${desde}" class="form-control">
+        <label for="hasta">Hasta</label>
+        <input type="date" id="hasta" name="hasta" th:value="${hasta}" class="form-control">
+        <button type="submit" class="btn btn-primary">Generar</button>
+    </form>
+    <p class="app-subtitle" th:if="${desde == null and hasta == null}">
+        Sin fechas seleccionadas se muestra el acumulado histórico completo.
+    </p>
+
+    <section class="app-section">
+        <h2>Cargas</h2>
+        <div class="stat-grid">
+            <div class="stat-card">
+                <span class="stat-value" th:text="${reporte.totalCargas}"></span>
+                <span class="stat-label">Cargas publicadas</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-value" th:text="${reporte.sumaPeso}"></span>
+                <span class="stat-label">Peso total (ton)</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-value" th:text="${'$' + #numbers.formatDecimal(reporte.sumaPrecioOfrecido, 1, 'POINT', 0, 'COMMA')}"></span>
+                <span class="stat-label">Valor total ofrecido</span>
+            </div>
+        </div>
+        <div class="table-responsive">
+        <table class="app-table" th:if="${not #maps.isEmpty(reporte.cargasPorEstado)}">
+            <thead><tr><th>Estado</th><th>Cantidad</th></tr></thead>
+            <tbody>
+            <tr th:each="entrada : ${reporte.cargasPorEstado}">
+                <td th:insert="~{fragments/badge :: pill(${entrada.key.name()})}"></td>
+                <td th:text="${entrada.value}"></td>
+            </tr>
+            </tbody>
+        </table>
+        </div>
+    </section>
+
+    <section class="app-section">
+        <h2>Ofertas</h2>
+        <div class="stat-grid">
+            <div class="stat-card">
+                <span class="stat-value" th:text="${reporte.totalOfertas}"></span>
+                <span class="stat-label">Ofertas recibidas</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-value" th:text="${'$' + #numbers.formatDecimal(reporte.montoPromedioOfertas, 1, 'POINT', 0, 'COMMA')}"></span>
+                <span class="stat-label">Monto promedio</span>
+            </div>
+        </div>
+    </section>
+
+    <section class="app-section">
+        <h2>Viajes</h2>
+        <p class="app-subtitle">Se cuentan por fecha de inicio real; los viajes aún programados no tienen fecha de inicio.</p>
+        <div class="stat-grid">
+            <div class="stat-card">
+                <span class="stat-value" th:text="${reporte.totalViajesIniciados}"></span>
+                <span class="stat-label">Viajes iniciados</span>
+            </div>
+        </div>
+        <div class="table-responsive">
+        <table class="app-table" th:if="${not #maps.isEmpty(reporte.viajesPorEstado)}">
+            <thead><tr><th>Estado</th><th>Cantidad</th></tr></thead>
+            <tbody>
+            <tr th:each="entrada : ${reporte.viajesPorEstado}">
+                <td th:insert="~{fragments/badge :: pill(${entrada.key.name()})}"></td>
+                <td th:text="${entrada.value}"></td>
+            </tr>
+            </tbody>
+        </table>
+        </div>
+    </section>
+
+    <section class="app-section">
+        <h2>Comisiones (ingresos de BookTruck)</h2>
+        <p class="app-subtitle">
+            Comisión simulada del <span th:text="${#numbers.formatDecimal(@viajeService.porcentajeComision, 1, 'POINT', 0, 'COMMA')}"></span>%
+            sobre el monto acordado, descontada al transportador al finalizar el viaje. Se cuentan por fecha de entrega.
+        </p>
+        <div class="stat-grid">
+            <div class="stat-card">
+                <span class="stat-value" th:text="${'$' + #numbers.formatDecimal(reporte.totalComisiones, 1, 'POINT', 0, 'COMMA')}"></span>
+                <span class="stat-label">Comisiones generadas</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-value" th:text="${reporte.totalViajesConComision}"></span>
+                <span class="stat-label">Viajes finalizados</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-value" th:text="${'$' + #numbers.formatDecimal(reporte.valorTransportado, 1, 'POINT', 0, 'COMMA')}"></span>
+                <span class="stat-label">Valor transportado</span>
+            </div>
+        </div>
+    </section>
+
+    <section class="app-section">
+        <h2>Calificaciones</h2>
+        <div class="stat-grid">
+            <div class="stat-card">
+                <span class="stat-value" th:text="${reporte.totalCalificaciones}"></span>
+                <span class="stat-label">Calificaciones registradas</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-value" th:text="${reporte.promedioCalificacionEmpresa != null ? #numbers.formatDecimal(reporte.promedioCalificacionEmpresa, 1, 2) : '-'}"></span>
+                <span class="stat-label">Promedio: empresa → transportador</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-value" th:text="${reporte.promedioCalificacionTransportador != null ? #numbers.formatDecimal(reporte.promedioCalificacionTransportador, 1, 2) : '-'}"></span>
+                <span class="stat-label">Promedio: transportador → empresa</span>
+            </div>
+        </div>
+    </section>
+    <footer th:replace="~{fragments/footer-app :: footer}"></footer>
+</main>
+</body>
+</html>

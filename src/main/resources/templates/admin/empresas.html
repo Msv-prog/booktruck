@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Empresas - BookTruck Admin</title>
+    <th:block th:replace="~{fragments/head :: css}"></th:block>
+</head>
+<body>
+<div th:replace="~{fragments/navbar-admin :: nav}"></div>
+
+<main class="app-content">
+    <h1>Empresas</h1>
+    <p class="app-subtitle">Todas las empresas registradas en la plataforma.</p>
+
+    <div class="alert alert-success" th:if="${exito}" th:text="${exito}"></div>
+    <div class="alert alert-error" th:if="${error}" th:text="${error}"></div>
+
+    <form th:action="@{/admin/empresas}" method="get" class="filter-bar filter-bar-grid filter-bar-compacta">
+        <div class="filter-group">
+            <label for="verificacion">Verificación</label>
+            <select id="verificacion" name="verificacion" class="form-control">
+                <option value="">Todas</option>
+                <option value="PENDIENTE" th:selected="${verificacion != null and verificacion.name() == 'PENDIENTE'}">Pendiente</option>
+                <option value="APROBADO" th:selected="${verificacion != null and verificacion.name() == 'APROBADO'}">Aprobada</option>
+                <option value="RECHAZADO" th:selected="${verificacion != null and verificacion.name() == 'RECHAZADO'}">Rechazada</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label for="ciudad">Ciudad</label>
+            <select id="ciudad" name="ciudad" class="form-control">
+                <option value="">Todas</option>
+                <option th:each="c : ${ciudades}" th:value="${c}" th:text="${c}" th:selected="${c == ciudad}"></option>
+            </select>
+        </div>
+        <div class="filter-group filter-group-ancho">
+            <label for="busqueda">Nombre o NIT</label>
+            <input type="text" id="busqueda" name="busqueda" class="form-control" th:value="${busqueda}" placeholder="Buscar por razón social o NIT">
+        </div>
+        <button type="submit" class="btn btn-primary">Filtrar</button>
+    </form>
+    <div th:replace="~{fragments/filtros :: resumen(${paginacion.total}, ${total}, ${hayFiltros}, '/admin/empresas', 'empresas')}"></div>
+
+    <section class="app-section">
+        <div class="table-responsive">
+        <table class="app-table" th:if="${not #lists.isEmpty(empresas)}">
+            <thead>
+            <tr>
+                <th>Razón social</th>
+                <th>NIT</th>
+                <th>Email</th>
+                <th>Teléfono</th>
+                <th>Ciudad</th>
+                <th>Cuenta</th>
+                <th>Verificación</th>
+                <th>Cargas publicadas</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="empresa : ${empresas}">
+                <td th:text="${empresa.razonSocial}"></td>
+                <td th:text="${empresa.nit}"></td>
+                <td th:text="${empresa.usuario.email}"></td>
+                <td th:text="${empresa.telefono}"></td>
+                <td th:text="${empresa.ciudad}"></td>
+                <td th:insert="~{fragments/badge :: pill(${empresa.usuario.activo} ? 'Activa' : 'Inactiva')}"></td>
+                <td>
+                    <th:block th:with="estadoDocs=${@verificacionService.estadoEmpresa(empresa).name()}">
+                        <span th:insert="~{fragments/badge :: pill(${estadoDocs})}"></span>
+                    </th:block>
+                    <a th:href="@{/admin/empresas/{id}/verificar(id=${empresa.id})}">Revisar documentos</a>
+                </td>
+                <td th:text="${cargasPorEmpresa.get(empresa.id)}"></td>
+            </tr>
+            </tbody>
+        </table>
+        </div>
+        <nav th:replace="~{fragments/paginacion :: pager(${paginacion})}"></nav>
+        <div class="empty-state" th:if="${#lists.isEmpty(empresas) and not hayFiltros}">
+            <p>No hay empresas registradas.</p>
+        </div>
+        <th:block th:if="${#lists.isEmpty(empresas) and hayFiltros}">
+            <div th:replace="~{fragments/filtros :: sin-resultados('/admin/empresas')}"></div>
+        </th:block>
+    </section>
+    <footer th:replace="~{fragments/footer-app :: footer}"></footer>
+</main>
+</body>
+</html>

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<!--
+    Contenido de la página completa de un viaje, igual para empresa, transportador y admin.
+    rol: 'EMPRESA', 'TRANSPORTADOR' o 'ADMIN' (decide qué dinero se muestra y las rutas de la prueba).
+    puntos: ubicaciones registradas; calificaciones: las del viaje.
+-->
+<th:block th:fragment="contenido(viaje, rol, puntos, calificaciones)">
+    <div th:insert="~{fragments/viaje-timeline :: stepper(${viaje})}"></div>
+    <p class="celda-secundaria texto-error" th:if="${viaje.atrasado}">Atrasado: ya pasó la hora de recolección y el viaje no se ha iniciado.</p>
+
+    <div class="viaje-detalle-grid">
+        <section class="app-section">
+            <h2>Partes</h2>
+            <div class="persona viaje-persona">
+                <span th:replace="~{fragments/avatar :: avatar(${viaje.carga.empresa.usuario}, ${viaje.carga.empresa.iniciales}, 'mediano')}"></span>
+                <div>
+                    <span class="celda-principal" th:text="${viaje.carga.empresa.razonSocial}"></span>
+                    <span class="celda-secundaria" th:text="${'Empresa · ' + viaje.carga.empresa.telefono}"></span>
+                </div>
+            </div>
+            <div class="persona viaje-persona">
+                <span th:replace="~{fragments/avatar :: avatar(${viaje.transportador.usuario}, ${viaje.transportador.iniciales}, 'mediano')}"></span>
+                <div>
+                    <span class="celda-principal" th:text="${viaje.transportador.nombreCompleto}"></span>
+                    <span class="celda-secundaria" th:text="${'Transportador · licencia ' + viaje.transportador.licencia + ' · ' + viaje.transportador.telefono}"></span>
+                </div>
+            </div>
+        </section>
+
+        <section class="app-section">
+            <h2>Dinero</h2>
+            <dl class="detalle-lista">
+                <dt>Monto acordado</dt>
+                <dd th:text="${'$' + #numbers.formatDecimal(viaje.oferta.monto, 1, 'POINT', 0, 'COMMA')}"></dd>
+                <th:block th:if="${rol != 'EMPRESA'}">
+                    <dt>Comisión BookTruck</dt>
+                    <dd th:text="${viaje.comisionMonto != null
+                            ? '$' + #numbers.formatDecimal(viaje.comisionMonto, 1, 'POINT', 0, 'COMMA') + ' (' + #numbers.formatDecimal(viaje.comisionPorcentaje, 1, 'POINT', 0, 'COMMA') + '%)'
+                            : 'Se calcula al confirmar la recepción'}"></dd>
+                    <dt>Neto para el transportador</dt>
+                    <dd th:text="${viaje.netoTransportador != null ? '$' + #numbers.formatDecimal(viaje.netoTransportador, 1, 'POINT', 0, 'COMMA') : '-'}"></dd>
+                </th:block>
+            </dl>
+            <h2>Prueba de entrega</h2>
+            <p th:unless="${viaje.tienePruebaEntrega}" class="celda-secundaria">Todavía no hay prueba de entrega.</p>
+            <a th:if="${viaje.tienePruebaEntrega}" target="_blank" class="btn btn-secondary btn-auto"
+               th:href="@{${(rol == 'ADMIN' ? '/admin' : (rol == 'EMPRESA' ? '/empresa' : '/transportador')) + '/viajes/' + viaje.id + '/prueba-entrega'}}"
+               th:text="${'Ver ' + (viaje.evidenciaNombreOriginal != null ? viaje.evidenciaNombreOriginal : 'prueba')}">Ver prueba</a>
+        </section>
+    </div>
+
+    <section class="app-section">
+        <h2>Detalles</h2>
+        <dl class="detalle-lista">
+            <th:block th:replace="~{fragments/detalle-modal :: filas-viaje(${viaje}, false)}"></th:block>
+        </dl>
+    </section>
+
+    <section class="app-section">
+        <h2>Recorrido</h2>
+        <div id="mapa" class="map-container" th:if="${not #lists.isEmpty(puntos)}"></div>
+        <p class="celda-secundaria" th:if="${#lists.isEmpty(puntos)}">El transportador todavía no ha registrado ubicaciones.</p>
+        <!-- La tabla alimenta el mapa (mapa-seguimiento.js); se muestran las últimas posiciones -->
+        <div class="table-responsive" th:if="${not #lists.isEmpty(puntos)}">
+            <table class="app-table" id="tabla-puntos">
+                <thead><tr><th>Fecha y hora</th><th>Observación</th></tr></thead>
+                <tbody>
+                <tr th:each="punto : ${puntos}"
+                    th:attr="data-lat=${punto.latitud}, data-lon=${punto.longitud}, data-fecha=${#temporals.format(punto.fechaHora, 'dd/MM/yyyy HH:mm:ss')}, data-obs=${punto.observacion}">
+                    <td th:text="${#temporals.format(punto.fechaHora, 'dd/MM/yyyy HH:mm')}"></td>
+                    <td th:text="${punto.observacion != null ? punto.observacion : '-'}"></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="app-section">
+        <h2>Calificaciones</h2>
+        <p class="celda-secundaria" th:if="${#lists.isEmpty(calificaciones)}">Este viaje todavía no tiene calificaciones.</p>
+        <div th:each="c : ${calificaciones}" class="viaje-calificacion">
+            <strong th:text="${c.evaluadorTipo.name() == 'EMPRESA' ? 'La empresa calificó al transportador' : 'El transportador calificó a la empresa'}"></strong>
+            <span class="rating-stars" th:text="${'★ ' + c.puntuacion + ' de 5'}"></span>
+            <p class="celda-secundaria" th:if="${c.comentario != null and !#strings.isEmpty(c.comentario)}" th:text="${'“' + c.comentario + '”'}"></p>
+        </div>
+    </section>
+</th:block>
+</body>
+</html>

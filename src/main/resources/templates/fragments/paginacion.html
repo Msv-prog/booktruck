@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<!-- pag: com.booktruck.util.Paginacion. Solo se muestra si hay más de una página. -->
+<nav th:fragment="pager(pag)" class="paginacion" th:if="${pag != null and pag.variasPaginas}" aria-label="Paginación">
+    <a th:if="${pag.pagina > 1}" th:href="${pag.url(pag.pagina - 1)}">&larr; Anterior</a>
+    <span th:unless="${pag.pagina > 1}" class="pagina-deshabilitada">&larr; Anterior</span>
+
+    <th:block th:each="n : ${#numbers.sequence(1, pag.totalPaginas)}">
+        <span th:if="${n == pag.pagina}" class="pagina-actual" th:text="${n}"></span>
+        <a th:unless="${n == pag.pagina}" th:href="${pag.url(n)}" th:text="${n}"></a>
+    </th:block>
+
+    <a th:if="${pag.pagina < pag.totalPaginas}" th:href="${pag.url(pag.pagina + 1)}">Siguiente &rarr;</a>
+    <span th:unless="${pag.pagina < pag.totalPaginas}" class="pagina-deshabilitada">Siguiente &rarr;</span>
+</nav>
+</body>
+</html>

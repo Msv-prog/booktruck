@@ -1,0 +1,87 @@
+﻿<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Vehículos - BookTruck</title>
+    <th:block th:replace="~{fragments/head :: css}"></th:block>
+</head>
+<body>
+<div th:replace="~{fragments/navbar-transportador :: nav}"></div>
+
+<main class="app-content">
+    <h1>Vehículos</h1>
+    <p class="app-subtitle">Vehículos que has registrado para transportar cargas.</p>
+
+    <div class="alert alert-success" th:if="${param.registrado}">Vehículo registrado correctamente.</div>
+    <div class="alert alert-success" th:if="${exito}" th:text="${exito}"></div>
+    <div class="alert alert-error" th:if="${error}" th:text="${error}"></div>
+
+    <p class="app-back-link"><a th:href="@{/transportador/vehiculos/nuevo}">+ Registrar vehículo</a></p>
+
+    <section class="app-section">
+        <div class="table-responsive">
+        <table class="app-table" th:if="${not #lists.isEmpty(vehiculos)}">
+            <thead>
+            <tr>
+                <th>Placa</th>
+                <th>Tipo</th>
+                <th>Marca</th>
+                <th>Capacidad (ton)</th>
+                <th>Tipo de carrocería</th>
+                <th>Estado</th>
+                <th>Disponibilidad</th>
+                <th>Documentos</th>
+                <th>Acción</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="vehiculo : ${vehiculos}" th:with="enViaje=${@viajeService.tieneViajeActivo(vehiculo.id)}">
+                <td th:text="${vehiculo.placa}"></td>
+                <td>
+                    <span class="celda-principal" th:text="${vehiculo.tipoVehiculo.name() == 'ARTICULADO'} ? 'Articulado' : 'Sencillo'"></span>
+                    <th:block th:if="${vehiculo.licenciaRequerida != null}">
+                        <span class="celda-secundaria"
+                              th:text="${vehiculo.clasePeso + ' · requiere ' + vehiculo.licenciaRequerida.name()}"></span>
+                        <span class="badge badge-error" th:unless="${transportador.puedeConducir(vehiculo)}">Tu licencia no alcanza</span>
+                    </th:block>
+                    <form th:if="${vehiculo.pesoBrutoKg == null}" class="form-inline-compacto"
+                          th:action="@{/transportador/vehiculos/{id}/peso-bruto(id=${vehiculo.id})}" method="post">
+                        <span class="badge badge-advertencia">Falta peso bruto</span>
+                        <input type="number" name="pesoBrutoKg" class="form-control" min="1" max="60000" step="1"
+                               placeholder="kg" aria-label="Peso bruto vehicular en kg" required>
+                        <button type="submit" class="btn-link">Guardar</button>
+                    </form>
+                </td>
+                <td th:text="${vehiculo.marca}"></td>
+                <td th:text="${vehiculo.capacidadToneladas}"></td>
+                <td th:text="${vehiculo.tipoCarroceria}"></td>
+                <td th:insert="~{fragments/badge :: pill(${vehiculo.activo} ? 'Activo' : 'Inactivo')}"></td>
+                <td>
+                    <span th:if="${enViaje}" class="badge badge-advertencia">En viaje</span>
+                    <span th:unless="${enViaje}" class="badge badge-exito">Libre</span>
+                </td>
+                <td th:with="docs=${estadoDocumentos.get(vehiculo.id).name()}">
+                    <div class="celda-acciones">
+                        <span class="badge"
+                              th:classappend="${docs == 'APROBADO' ? 'badge-exito' : (docs == 'RECHAZADO' ? 'badge-error' : 'badge-advertencia')}"
+                              th:text="${docs == 'APROBADO' ? 'Al día' : (docs == 'RECHAZADO' ? 'Rechazado' : 'Pendiente')}"></span>
+                        <a th:href="@{/transportador/vehiculos/{id}/documentos(id=${vehiculo.id})}">Documentos</a>
+                    </div>
+                </td>
+                <td>
+                    <form th:action="@{/transportador/vehiculos/{id}/estado(id=${vehiculo.id})}" method="post">
+                        <button type="submit" class="btn-link" th:text="${vehiculo.activo} ? 'Desactivar' : 'Activar'"></button>
+                    </form>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+        </div>
+        <div class="empty-state" th:if="${#lists.isEmpty(vehiculos)}">
+            <p>Todavía no has registrado ningún vehículo.</p>
+            <a th:href="@{/transportador/vehiculos/nuevo}" class="btn btn-primary">Registrar tu primer vehículo</a>
+        </div>
+    </section>
+    <footer th:replace="~{fragments/footer-app :: footer}"></footer>
+</main>
+</body>
+</html>

@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Inicio - BookTruck</title>
+    <th:block th:replace="~{fragments/head :: css}"></th:block>
+</head>
+<body>
+<div th:replace="~{fragments/navbar-empresa :: nav}"></div>
+
+<main class="app-content">
+    <h1>Hola, <span th:text="${empresa.razonSocial}"></span></h1>
+    <p class="app-subtitle">Resumen de tu actividad en BookTruck.</p>
+
+    <div class="alert alert-success" th:if="${param.cargaPublicada}">Carga publicada correctamente.</div>
+
+    <div class="stat-grid">
+        <a th:href="@{/empresa/cargas}" class="stat-card">
+            <span class="stat-value" th:text="${resumen.cargasActivas}"></span>
+            <span class="stat-label">Cargas activas</span>
+        </a>
+        <a th:href="@{/empresa/ofertas}" class="stat-card">
+            <span class="stat-value" th:text="${resumen.ofertasPendientes}"></span>
+            <span class="stat-label">Ofertas por revisar</span>
+        </a>
+        <a th:href="@{/empresa/viajes}" class="stat-card">
+            <span class="stat-value" th:text="${resumen.viajesEnCurso}"></span>
+            <span class="stat-label">Viajes en curso</span>
+        </a>
+    </div>
+
+    <section class="app-section">
+        <h2>Cargas recientes</h2>
+        <div class="table-responsive">
+        <table class="app-table" th:if="${not #lists.isEmpty(resumen.cargasRecientes)}">
+            <thead>
+            <tr>
+                <th>Origen</th>
+                <th>Destino</th>
+                <th>Peso (ton)</th>
+                <th>Precio ofrecido</th>
+                <th>Estado</th>
+                <th>Publicada</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="carga : ${resumen.cargasRecientes}">
+                <td th:text="${carga.origen}"></td>
+                <td th:text="${carga.destino}"></td>
+                <td th:text="${carga.peso}"></td>
+                <td class="celda-precio" th:text="${'$' + #numbers.formatDecimal(carga.precioOfrecido, 1, 'POINT', 0, 'COMMA')}"></td>
+                <td th:insert="~{fragments/badge :: pill(${carga.estado.name()})}"></td>
+                <td th:text="${#temporals.format(carga.fechaPublicacion, 'dd/MM/yyyy HH:mm')}"></td>
+            </tr>
+            </tbody>
+        </table>
+        </div>
+        <div class="empty-state" th:if="${#lists.isEmpty(resumen.cargasRecientes)}">
+            <p>Todavía no has publicado ninguna carga.</p>
+            <a th:if="${@verificacionService.empresaVerificada(empresa)}" th:href="@{/empresa/cargas/nueva}" class="btn btn-primary">Publicar tu primera carga</a>
+            <th:block th:unless="${@verificacionService.empresaVerificada(empresa)}">
+                <span th:replace="~{fragments/aviso-verificacion :: bloqueado('Verifica tu cuenta para publicar cargas', '/empresa/perfil')}"></span>
+            </th:block>
+        </div>
+    </section>
+    <section class="grafica-grid">
+        <div class="grafica-tarjeta">
+            <h2>Lo que pagaste en fletes por mes</h2>
+            <div class="grafica-lienzo"><canvas data-grafica="gastoPorMes" data-tipo="barras" data-dinero aria-label="Pago en fletes por mes"></canvas></div>
+            <p class="grafica-vacia">Aún no tienes viajes finalizados en los últimos 6 meses.</p>
+        </div>
+        <div class="grafica-tarjeta">
+            <h2>Tus cargas por estado</h2>
+            <div class="grafica-lienzo"><canvas data-grafica="cargasPorEstado" data-tipo="dona" aria-label="Cargas por estado"></canvas></div>
+            <p class="grafica-vacia">Todavía no has publicado cargas.</p>
+        </div>
+    </section>    <footer th:replace="~{fragments/footer-app :: footer}"></footer>
+</main>
+<script th:inline="javascript">window.datosGraficas = /*[[${graficas}]]*/ {};</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script th:src="@{/js/graficas.js}"></script></body>
+</html>

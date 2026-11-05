@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Ofertas por revisar - BookTruck</title>
+    <th:block th:replace="~{fragments/head :: css}"></th:block>
+</head>
+<body>
+<div th:replace="~{fragments/navbar-empresa :: nav}"></div>
+
+<main class="app-content">
+    <h1>Ofertas por revisar</h1>
+    <p class="app-subtitle">Ofertas pendientes en todas tus cargas publicadas.</p>
+
+    <section class="app-section">
+        <div class="table-responsive">
+        <table class="app-table" th:if="${not #lists.isEmpty(ofertas)}">
+            <thead>
+            <tr>
+                <th>Carga</th>
+                <th>Transportador</th>
+                <th>Reputación</th>
+                <th>Monto ofrecido</th>
+                <th>Fecha</th>
+                <th>Acción</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="oferta : ${ofertas}"
+                th:with="resumenTransportador=${@calificacionService.resumenTransportador(oferta.transportador.id)}">
+                <td th:text="${oferta.carga.origen} + ' → ' + ${oferta.carga.destino}"></td>
+                <td th:text="${oferta.transportador.nombreCompleto}"></td>
+                <td th:insert="~{fragments/calificacion :: resumen(${resumenTransportador})}"></td>
+                <td class="celda-precio" th:text="${'$' + #numbers.formatDecimal(oferta.monto, 1, 'POINT', 0, 'COMMA')}"></td>
+                <td th:text="${#temporals.format(oferta.fechaOferta, 'dd/MM/yyyy HH:mm')}"></td>
+                <td><a th:href="@{/empresa/cargas/{cargaId}/ofertas(cargaId=${oferta.carga.id})}">Ver y decidir</a></td>
+            </tr>
+            </tbody>
+        </table>
+        </div>
+        <div class="empty-state" th:if="${#lists.isEmpty(ofertas)}">
+            <p>No tienes ofertas pendientes por revisar.</p>
+        </div>
+    </section>
+    <footer th:replace="~{fragments/footer-app :: footer}"></footer>
+</main>
+</body>
+</html>

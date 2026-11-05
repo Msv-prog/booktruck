@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Registro de empresa - BookTruck</title>
+    <th:block th:replace="~{fragments/head :: css}"></th:block>
+</head>
+<body>
+<div class="auth-split">
+    <div class="auth-split-brand">
+        <a th:href="@{/}" class="brand-lockup brand-lockup-light">
+            <img th:src="@{/images/logobt.png}" alt="BookTruck" class="logo-img">
+            <span class="brand-name">BookTruck</span>
+        </a>
+        <h2>Publica tu primera carga hoy mismo.</h2>
+        <p>Crea tu cuenta de empresa en dos pasos: primero tus datos de acceso, luego la información de tu compañía.</p>
+    </div>
+    <div class="auth-split-form">
+        <div class="auth-card">
+            <div class="auth-logo brand-lockup">
+                <img th:src="@{/images/logobt.png}" alt="BookTruck" class="logo-img">
+                <span class="brand-name">BookTruck</span>
+            </div>
+            <h1>Registro de empresa</h1>
+
+            <div class="wizard-steps">
+                <div class="wizard-step-dot is-active" data-dot="1"><span class="num">1</span> Acceso</div>
+                <div class="wizard-step-line"></div>
+                <div class="wizard-step-dot" data-dot="2"><span class="num">2</span> Empresa</div>
+            </div>
+
+            <div class="alert alert-error" th:if="${error}" th:text="${error}"></div>
+
+            <form th:action="@{/auth/registro/empresa}" th:object="${form}" method="post" id="form-registro">
+                <div class="wizard-panel" data-step="1">
+                    <div class="form-group">
+                        <label for="email">Correo electrónico</label>
+                        <input type="email" id="email" th:field="*{email}" class="form-control" required autofocus>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Contraseña</label>
+                        <input type="password" id="password" th:field="*{password}" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="confirmarPassword">Confirmar contraseña</label>
+                        <input type="password" id="confirmarPassword" th:field="*{confirmarPassword}" class="form-control" required>
+                    </div>
+                    <div class="wizard-actions">
+                        <button type="button" class="btn btn-primary wizard-next">Siguiente</button>
+                    </div>
+                </div>
+
+                <div class="wizard-panel" data-step="2" hidden>
+                    <div class="form-group">
+                        <label for="nit">NIT</label>
+                        <input type="text" id="nit" th:field="*{nit}" class="form-control" inputmode="numeric" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="razonSocial">Razón social</label>
+                        <input type="text" id="razonSocial" th:field="*{razonSocial}" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="telefono">Teléfono</label>
+                        <input type="text" id="telefono" th:field="*{telefono}" class="form-control" maxlength="10" inputmode="numeric" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="ciudadSelect">Ciudad</label>
+                        <select id="ciudadSelect" class="form-control" data-lista="CIUDADES_PRINCIPALES" data-target="ciudad"></select>
+                        <input type="text" id="ciudadOtro" class="form-control" placeholder="Especifica la ciudad" hidden style="margin-top: 8px;">
+                        <input type="hidden" id="ciudad" th:field="*{ciudad}">
+                    </div>
+                    <div class="form-group">
+                        <label for="direccion">Dirección</label>
+                        <input type="text" id="direccion" th:field="*{direccion}" class="form-control" required>
+                    </div>
+                    <div class="wizard-actions">
+                        <button type="button" class="btn btn-secondary wizard-back">Atrás</button>
+                        <button type="submit" class="btn btn-primary">Crear cuenta</button>
+                    </div>
+                </div>
+            </form>
+
+            <div class="auth-footer">
+                ¿Ya tienes cuenta? <a th:href="@{/auth/login}">Inicia sesión</a>
+            </div>
+        </div>
+    </div>
+</div>
+<script th:src="@{/js/listas-colombia.js}"></script>
+<script th:src="@{/js/select-otro.js}"></script>
+<script th:src="@{/js/nit-formato.js}"></script>
+<script th:src="@{/js/registro-wizard.js}"></script>
+</body>
+</html>

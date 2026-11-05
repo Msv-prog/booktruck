@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="modal" id="confirm-modal-overlay" class="modal-overlay">
+    <div class="modal-box">
+        <p id="confirm-modal-message">¿Confirmas esta acción?</p>
+        <div class="form-group" id="confirm-modal-motivo-group" hidden>
+            <label for="confirm-modal-motivo">Motivo</label>
+            <select id="confirm-modal-motivo" class="form-control">
+                <option value="">Selecciona un motivo</option>
+                <option value="CARGA_YA_ASIGNADA">Ya tenía carga asignada</option>
+                <option value="ESPACIO_INSUFICIENTE">No tenía espacio suficiente</option>
+                <option value="CONDUCTOR_NO_COINCIDE">El conductor no coincide con el del perfil</option>
+                <option value="VEHICULO_NO_DISPONIBLE">El vehículo no estaba disponible</option>
+                <option value="OTRO">Otro motivo</option>
+            </select>
+            <small class="field-error" id="confirm-modal-motivo-error"></small>
+        </div>
+        <div class="modal-actions">
+            <button type="button" id="confirm-modal-cancel" class="btn btn-secondary">Cancelar</button>
+            <button type="button" id="confirm-modal-accept" class="btn btn-primary">Confirmar</button>
+        </div>
+    </div>
+</div>
+</body>
+</html>

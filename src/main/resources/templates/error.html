@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Ocurrió un error - BookTruck</title>
+    <th:block th:replace="~{fragments/head :: css}"></th:block>
+</head>
+<body>
+<div class="error-page">
+    <div>
+        <div class="brand-lockup">
+            <img th:src="@{/images/logobt.png}" alt="BookTruck" class="logo-img">
+            <span class="brand-name">BookTruck</span>
+        </div>
+        <div class="error-page-code" th:text="${status} ?: '—'">Error</div>
+        <h1>Ocurrió un error inesperado</h1>
+        <p>No pudimos completar tu solicitud. Intenta de nuevo o vuelve al inicio.</p>
+        <a th:href="@{/}" class="btn btn-primary btn-auto">Volver al inicio</a>
+    </div>
+</div>
+</body>
+</html>

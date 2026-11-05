@@ -1,0 +1,117 @@
+﻿<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Ofertas recibidas - BookTruck</title>
+    <th:block th:replace="~{fragments/head :: css}"></th:block>
+</head>
+<body>
+<div th:replace="~{fragments/navbar-empresa :: nav}"></div>
+
+<main class="app-content">
+    <nav th:replace="~{fragments/breadcrumb :: trail(@{/empresa/cargas}, 'Mis cargas', 'Ofertas recibidas')}"></nav>
+    <h1>Ofertas recibidas</h1>
+    <p class="app-subtitle">
+        Carga: <span th:text="${carga.origen}"></span> &rarr; <span th:text="${carga.destino}"></span>
+        &middot; Precio ofrecido: <span th:text="${'$' + #numbers.formatDecimal(carga.precioOfrecido, 1, 'POINT', 0, 'COMMA')}"></span>
+        &middot; Carrocería: <span th:text="${carga.carroceriaTexto}"></span>
+        &middot; Estado: <span th:text="${carga.estado}"></span>
+    </p>
+    <p class="app-subtitle" th:if="${carga.estado.name() == 'PUBLICADA' and carga.recoleccionPasada}">
+        Ya pasó la fecha de recolección: no puedes aceptar ofertas.
+        <a th:href="@{/empresa/cargas/{id}/editar(id=${carga.id})}">Edita la carga</a> con una fecha nueva.
+    </p>
+
+    <div class="alert alert-success" th:if="${exito}" th:text="${exito}"></div>
+    <div class="alert alert-error" th:if="${error}" th:text="${error}"></div>
+
+    <section class="app-section">
+        <div class="table-responsive">
+        <table class="app-table" th:if="${not #lists.isEmpty(ofertas)}">
+            <thead>
+            <tr>
+                <th>Transportador</th>
+                <th>Reputación</th>
+                <th>Monto ofrecido</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="oferta : ${ofertas}"
+                th:with="resumenTransportador=${@calificacionService.resumenTransportador(oferta.transportador.id)},
+                         historial=${@viajeService.historialTransportador(oferta.transportador.id)}">
+                <td>
+                    <div class="persona">
+                        <span th:replace="~{fragments/avatar :: avatar(${oferta.transportador.usuario}, ${oferta.transportador.iniciales}, 'mediano')}"></span>
+                        <div>
+                            <span class="celda-principal" th:text="${oferta.transportador.nombreCompleto}"></span>
+                            <span class="celda-secundaria" th:text="${oferta.vehiculo.placa + ' · ' + oferta.vehiculo.tipoCarroceria.etiqueta
+                                    + (oferta.vehiculo.clasePeso != null ? ' · ' + oferta.vehiculo.clasePeso : '')
+                                    + ' · licencia ' + oferta.transportador.licencia}"></span>
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    <span th:insert="~{fragments/calificacion :: resumen(${resumenTransportador})}"></span>
+                    <span class="celda-secundaria" th:text="${historial.finalizados() + (historial.finalizados() == 1 ? ' viaje finalizado' : ' viajes finalizados')}"></span>
+                    <span class="celda-secundaria texto-error" th:if="${historial.canceladosPorEl() > 0}"
+                          th:text="${historial.canceladosPorEl() + (historial.canceladosPorEl() == 1 ? ' viaje cancelado por él' : ' viajes cancelados por él')}"></span>
+                </td>
+                <td class="celda-precio" th:text="${'$' + #numbers.formatDecimal(oferta.monto, 1, 'POINT', 0, 'COMMA')}"></td>
+                <td th:insert="~{fragments/badge :: pill(${oferta.estado.name()})}"></td>
+                <td>
+                    <div class="celda-acciones">
+                        <button type="button" class="btn-link js-ver-detalle"
+                                th:attr="data-detalle=${'detalle-oferta-' + oferta.id}"
+                                data-detalle-titulo="Detalles de la oferta">Ver detalles</button>
+                        <th:block th:if="${oferta.estado.name() == 'PENDIENTE' and carga.estado.name() == 'PUBLICADA' and not @verificacionService.empresaVerificada(empresa)}">
+                            <span th:replace="~{fragments/aviso-verificacion :: bloqueado('Verifica tu cuenta para aceptar ofertas', '/empresa/perfil')}"></span>
+                        </th:block>
+                        <form th:if="${oferta.estado.name() == 'PENDIENTE' and carga.estado.name() == 'PUBLICADA' and @verificacionService.empresaVerificada(empresa)}"
+                              th:action="@{/empresa/cargas/{cargaId}/ofertas/{ofertaId}/seleccionar(cargaId=${carga.id},ofertaId=${oferta.id})}"
+                              method="post"
+                              class="js-confirm"
+                              data-confirm-message="¿Confirmas seleccionar esta oferta? Las demás ofertas de esta carga se rechazarán y se generará el viaje.">
+                            <button type="submit" class="btn btn-primary btn-auto">Seleccionar</button>
+                        </form>
+                    </div>
+                    <template th:id="${'detalle-oferta-' + oferta.id}">
+                        <dl class="detalle-lista">
+                            <dt>Transportador</dt>
+                            <dd th:text="${oferta.transportador.nombreCompleto}"></dd>
+                            <dt>Reputación</dt>
+                            <dd th:insert="~{fragments/calificacion :: resumen(${resumenTransportador})}"></dd>
+                            <dt>Historial</dt>
+                            <dd th:text="${historial.finalizados() + ' finalizados · ' + historial.canceladosPorEl() + ' cancelados por él'}"></dd>
+                            <dt>Licencia</dt>
+                            <dd th:text="${oferta.transportador.licencia}"></dd>
+                            <dt>Teléfono</dt>
+                            <dd th:text="${oferta.transportador.telefono}"></dd>
+                            <th:block th:replace="~{fragments/detalle-modal :: filas-vehiculo(${oferta.vehiculo})}"></th:block>
+                            <dt>Monto ofrecido</dt>
+                            <dd th:text="${'$' + #numbers.formatDecimal(oferta.monto, 1, 'POINT', 0, 'COMMA')}"></dd>
+                            <dt>Estado</dt>
+                            <dd th:insert="~{fragments/badge :: pill(${oferta.estado.name()})}"></dd>
+                            <dt>Fecha de la oferta</dt>
+                            <dd th:text="${#temporals.format(oferta.fechaOferta, 'dd/MM/yyyy HH:mm')}"></dd>
+                        </dl>
+                    </template>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+        </div>
+        <div class="empty-state" th:if="${#lists.isEmpty(ofertas)}">
+            <p>Todavía no has recibido ofertas para esta carga.</p>
+        </div>
+    </section>
+
+    <p class="app-back-link"><a th:href="@{/empresa/cargas}">&larr; Volver a mis cargas</a></p>
+    <footer th:replace="~{fragments/footer-app :: footer}"></footer>
+</main>
+<div th:replace="~{fragments/confirm-modal :: modal}"></div>
+<div th:replace="~{fragments/detalle-modal :: modal}"></div>
+<script th:src="@{/js/confirm.js}"></script>
+<script th:src="@{/js/detalle-modal.js}"></script>
+</body>
+</html>

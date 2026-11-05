@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Mis ofertas - BookTruck</title>
+    <th:block th:replace="~{fragments/head :: css}"></th:block>
+</head>
+<body>
+<div th:replace="~{fragments/navbar-transportador :: nav}"></div>
+
+<main class="app-content">
+    <h1>Mis ofertas</h1>
+    <p class="app-subtitle">Todas las ofertas que has enviado, sin importar el estado.</p>
+
+    <section class="app-section">
+        <div class="table-responsive">
+        <table class="app-table" th:if="${not #lists.isEmpty(ofertas)}">
+            <thead>
+            <tr>
+                <th>Carga</th>
+                <th>Empresa</th>
+                <th>Vehículo</th>
+                <th>Monto ofrecido</th>
+                <th>Estado</th>
+                <th>Fecha</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="oferta : ${ofertas}">
+                <td th:text="${oferta.carga.origen} + ' → ' + ${oferta.carga.destino}"></td>
+                <td th:text="${oferta.carga.empresa.razonSocial}"></td>
+                <td th:text="${oferta.vehiculo.placa}"></td>
+                <td class="celda-precio" th:text="${'$' + #numbers.formatDecimal(oferta.monto, 1, 'POINT', 0, 'COMMA')}"></td>
+                <td th:insert="~{fragments/badge :: pill(${oferta.estado.name()})}"></td>
+                <td th:text="${#temporals.format(oferta.fechaOferta, 'dd/MM/yyyy HH:mm')}"></td>
+            </tr>
+            </tbody>
+        </table>
+        </div>
+        <div class="empty-state" th:if="${#lists.isEmpty(ofertas)}">
+            <p>Todavía no has enviado ninguna oferta.</p>
+            <a th:href="@{/transportador/cargas}" class="btn btn-primary">Ver cargas disponibles</a>
+        </div>
+    </section>
+    <footer th:replace="~{fragments/footer-app :: footer}"></footer>
+</main>
+</body>
+</html>

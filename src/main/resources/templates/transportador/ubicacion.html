@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Ubicación del viaje - BookTruck</title>
+    <th:block th:replace="~{fragments/head :: css}"></th:block>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+</head>
+<body>
+<div th:replace="~{fragments/navbar-transportador :: nav}"></div>
+
+<main class="app-content">
+    <nav th:replace="~{fragments/breadcrumb :: trail(@{/transportador/viajes}, 'Mis viajes', 'Ubicación del viaje')}"></nav>
+    <h1>Ubicación del viaje</h1>
+    <p class="app-subtitle">
+        Carga: <span th:text="${viaje.carga.origen}"></span> &rarr; <span th:text="${viaje.carga.destino}"></span>
+    </p>
+
+    <div th:insert="~{fragments/viaje-timeline :: stepper(${viaje})}"></div>
+
+    <div class="alert alert-success" th:if="${exito}" th:text="${exito}"></div>
+    <div class="alert alert-error" th:if="${error}" th:text="${error}"></div>
+
+    <section class="app-section" th:if="${viaje.estado.name() == 'EN_CURSO'}">
+        <p>Mientras el viaje está en curso, tu ubicación se actualiza automáticamente cada 30 minutos. También puedes
+            actualizarla manualmente cuando quieras.</p>
+
+        <div class="alert alert-advertencia" th:if="${requiereActualizacion}">
+            Debes actualizar tu ubicación: no se ha registrado ninguna en los últimos 30 minutos
+            (por ejemplo, si cerraste la app y volviste a entrar).
+        </div>
+
+        <form id="form-ubicacion" th:action="@{/transportador/viajes/{id}/ubicacion(id=${viaje.id})}" method="post">
+            <input type="hidden" id="latitud" name="latitud">
+            <input type="hidden" id="longitud" name="longitud">
+            <input type="hidden" id="observacion" name="observacion" value="Actualización manual">
+            <button type="button" id="btn-actualizar" class="btn btn-primary"
+                    th:text="${requiereActualizacion} ? 'Debes actualizar tu ubicación ahora' : 'Actualizar mi ubicación ahora'"></button>
+        </form>
+        <p id="geo-mensaje" class="app-subtitle"></p>
+    </section>
+
+    <div id="mapa" class="map-container" th:if="${not #lists.isEmpty(puntos)}"></div>
+
+    <section class="app-section">
+        <h2>Historial de ubicaciones</h2>
+        <div class="table-responsive">
+        <table class="app-table" id="tabla-puntos" th:if="${not #lists.isEmpty(puntos)}">
+            <thead>
+            <tr>
+                <th>Fecha y hora</th>
+                <th>Latitud</th>
+                <th>Longitud</th>
+                <th>Observación</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="punto : ${puntos}"
+                th:attr="data-lat=${punto.latitud}, data-lon=${punto.longitud}, data-fecha=${#temporals.format(punto.fechaHora, 'dd/MM/yyyy HH:mm:ss')}, data-obs=${punto.observacion}">
+                <td th:text="${#temporals.format(punto.fechaHora, 'dd/MM/yyyy HH:mm:ss')}"></td>
+                <td th:text="${punto.latitud}"></td>
+                <td th:text="${punto.longitud}"></td>
+                <td th:text="${punto.observacion}"></td>
+            </tr>
+            </tbody>
+        </table>
+        </div>
+        <div class="empty-state" th:if="${#lists.isEmpty(puntos)}">
+            <p>Todavía no se ha registrado ninguna ubicación para este viaje.</p>
+        </div>
+    </section>
+
+    <p class="app-back-link"><a th:href="@{/transportador/viajes}">&larr; Volver a mis viajes</a></p>
+    <footer th:replace="~{fragments/footer-app :: footer}"></footer>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script th:src="@{/js/mapa-seguimiento.js}"></script>
+<script th:if="${viaje.estado.name() == 'EN_CURSO'}" th:inline="none">
+    (function () {
+        var form = document.getElementById('form-ubicacion');
+
+        function capturarYEnviar(automatico) {
+            if (!navigator.geolocation) {
+                return;
+            }
+            navigator.geolocation.getCurrentPosition(function (posicion) {
+                document.getElementById('latitud').value = posicion.coords.latitude;
+                document.getElementById('longitud').value = posicion.coords.longitude;
+                document.getElementById('observacion').value = automatico ? 'Actualización automática' : 'Actualización manual';
+
+                if (automatico) {
+                    var datos = new URLSearchParams(new FormData(form));
+                    fetch(form.action, { method: 'POST', body: datos })
+                        .catch(function () { /* fallo silencioso: se reintenta en el siguiente ciclo */ });
+                } else {
+                    form.submit();
+                }
+            }, function () {
+                document.getElementById('geo-mensaje').textContent =
+                    'No se pudo obtener tu ubicación. Verifica los permisos del navegador.';
+            });
+        }
+
+        document.getElementById('btn-actualizar').addEventListener('click', function () {
+            capturarYEnviar(false);
+        });
+
+        setInterval(function () {
+            capturarYEnviar(true);
+        }, 30 * 60 * 1000);
+    })();
+</script>
+</body>
+</html>

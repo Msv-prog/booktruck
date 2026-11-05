@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Realizar oferta - BookTruck</title>
+    <th:block th:replace="~{fragments/head :: css}"></th:block>
+</head>
+<body>
+<div th:replace="~{fragments/navbar-transportador :: nav}"></div>
+
+<main class="app-content">
+    <nav th:replace="~{fragments/breadcrumb :: trail(@{/transportador/cargas}, 'Cargas disponibles', 'Realizar oferta')}"></nav>
+    <h1>Realizar oferta</h1>
+    <p class="app-subtitle">
+        Carga: <span th:text="${carga.origen}"></span> &rarr; <span th:text="${carga.destino}"></span>
+        &middot; Precio ofrecido por la empresa: <span th:text="${'$' + #numbers.formatDecimal(carga.precioOfrecido, 1, 'POINT', 0, 'COMMA')}"></span>
+        &middot; Peso: <span th:text="${carga.peso}"></span> ton
+        &middot; Carrocería: <span th:text="${carga.carroceriaTexto}"></span>
+    </p>
+
+    <div class="alert alert-error" th:if="${error}" th:text="${error}"></div>
+
+    <section class="app-section" th:unless="${verificado}">
+        <div class="empty-state">
+            <p>Para ofertar, tu cuenta debe estar verificada por el administrador.</p>
+            <a th:href="@{/transportador/perfil}" class="btn btn-primary">Ir a mi perfil</a>
+        </div>
+    </section>
+
+    <section class="app-section" th:if="${verificado and not #lists.isEmpty(vehiculosActivos)}">
+        <form th:action="@{/transportador/cargas/{id}/ofertar(id=${carga.id})}" th:object="${form}" method="post">
+            <div class="form-group">
+                <label for="vehiculoId">Vehículo</label>
+                <select id="vehiculoId" th:field="*{vehiculoId}" class="form-control" required>
+                    <option value="">Selecciona un vehículo</option>
+                    <option th:each="vehiculo : ${vehiculosActivos}"
+                            th:value="${vehiculo.id}"
+                            th:text="${vehiculo.placa} + ' - ' + ${vehiculo.marca} + ' (' + ${vehiculo.capacidadToneladas} + ' ton)'">
+                    </option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="monto">Monto que ofreces (COP)</label>
+                <input type="number" step="0.01" min="1" id="monto" th:field="*{monto}" class="form-control" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Enviar oferta</button>
+        </form>
+    </section>
+
+    <section class="app-section" th:if="${verificado and #lists.isEmpty(vehiculosActivos)}">
+        <p th:if="${not tieneVehiculosActivos}">No tienes vehículos activos. <a th:href="@{/transportador/vehiculos/nuevo}">Registra uno primero</a>.</p>
+        <p th:if="${tieneVehiculosActivos and #lists.isEmpty(placasSinDocumentos) and #lists.isEmpty(motivosExcluidos)}">
+            Ninguno de tus vehículos tiene capacidad para esta carga (<span th:text="${carga.peso}"></span> ton).
+            <a th:href="@{/transportador/vehiculos/nuevo}">Registra un vehículo más grande</a> o busca otra carga.
+        </p>
+    </section>
+
+    <p class="app-subtitle" th:if="${verificado and not #lists.isEmpty(placasSinDocumentos)}">
+        <th:block th:text="${#lists.size(placasSinDocumentos) == 1 ? 'No aparece' : 'No aparecen'}"></th:block>
+        <strong th:text="${#strings.listJoin(placasSinDocumentos, ', ')}"></strong> porque sus documentos no están al día.
+        <a th:href="@{/transportador/vehiculos}">Revisa tus vehículos</a>.
+    </p>
+    <p class="app-subtitle" th:if="${verificado}" th:each="motivo : ${motivosExcluidos}" th:text="${motivo}"></p>
+
+    <p class="app-back-link"><a th:href="@{/transportador/cargas}">&larr; Volver a cargas disponibles</a></p>
+    <footer th:replace="~{fragments/footer-app :: footer}"></footer>
+</main>
+</body>
+</html>

@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Página no encontrada - BookTruck</title>
+    <th:block th:replace="~{fragments/head :: css}"></th:block>
+</head>
+<body>
+<div class="error-page">
+    <div>
+        <div class="brand-lockup">
+            <img th:src="@{/images/logobt.png}" alt="BookTruck" class="logo-img">
+            <span class="brand-name">BookTruck</span>
+        </div>
+        <div class="error-page-code">404</div>
+        <h1>No encontramos esta página</h1>
+        <p>El enlace que seguiste puede estar mal escrito o la página ya no existe.</p>
+        <a th:href="@{/}" class="btn btn-primary btn-auto">Volver al inicio</a>
+    </div>
+</div>
+</body>
+</html>

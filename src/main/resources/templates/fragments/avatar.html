@@ -1,0 +1,11 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<!-- Foto de perfil o logo; sin foto, las iniciales. tamano: 'chico' (32 px), 'mediano' (44 px) o 'grande' (88 px) -->
+<span th:fragment="avatar(usuario, iniciales, tamano)" class="avatar" th:classappend="${'avatar-' + tamano}">
+    <img th:if="${usuario != null and usuario.fotoRuta != null}" th:src="@{/fotos/{id}(id=${usuario.id}, v=${usuario.fotoRuta.hashCode()})}"
+         alt="" loading="lazy">
+    <span th:unless="${usuario != null and usuario.fotoRuta != null}" th:text="${iniciales}" aria-hidden="true">BT</span>
+</span>
+</body>
+</html>

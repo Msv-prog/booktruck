@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Documentos del vehículo - BookTruck</title>
+    <th:block th:replace="~{fragments/head :: css}"></th:block>
+</head>
+<body>
+<div th:replace="~{fragments/navbar-transportador :: nav}"></div>
+
+<main class="app-content">
+    <nav th:replace="~{fragments/breadcrumb :: trail(@{/transportador/vehiculos}, 'Vehículos', 'Documentos')}"></nav>
+    <h1 th:text="${'Documentos del vehículo ' + vehiculo.placa}">Documentos del vehículo</h1>
+    <p class="app-subtitle"
+       th:text="${(vehiculo.tipoVehiculo.name() == 'ARTICULADO' ? 'Articulado' : 'Sencillo') + ' · ' + vehiculo.marca + ' · ' + vehiculo.capacidadToneladas + ' ton'}"></p>
+
+    <section class="app-section">
+        <p class="app-subtitle">
+            Para ofertar con este vehículo, sus documentos deben estar aprobados por el administrador y vigentes.
+            Cada uno se sube por separado (PDF, JPG o PNG, máx. 5 MB).
+        </p>
+        <div class="alert alert-error" th:if="${errorDocumento}" th:text="${errorDocumento}"></div>
+        <div class="alert alert-success" th:if="${exitoDocumento}" th:text="${exitoDocumento}"></div>
+        <div th:replace="~{fragments/documentos :: progreso(${progreso})}"></div>
+        <div th:replace="~{fragments/documentos :: tarjetas(${tiposDocumento}, ${documentos}, ${'/transportador/vehiculos/' + vehiculo.id + '/documentos'})}"></div>
+    </section>
+
+    <p class="app-back-link"><a th:href="@{/transportador/vehiculos}">&larr; Volver a mis vehículos</a></p>
+    <footer th:replace="~{fragments/footer-app :: footer}"></footer>
+</main>
+<script th:src="@{/js/archivo-limite.js}"></script>
+</body>
+</html>

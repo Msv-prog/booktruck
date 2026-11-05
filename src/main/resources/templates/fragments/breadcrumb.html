@@ -1,0 +1,10 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<nav th:fragment="trail(padreUrl, padreTexto, actual)" class="breadcrumb" aria-label="breadcrumb">
+    <a th:href="${padreUrl}" th:text="${padreTexto}"></a>
+    <span class="breadcrumb-sep">/</span>
+    <span class="breadcrumb-current" th:text="${actual}"></span>
+</nav>
+</body>
+</html>

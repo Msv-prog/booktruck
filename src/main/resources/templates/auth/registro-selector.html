@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Crear cuenta - BookTruck</title>
+    <th:block th:replace="~{fragments/head :: css}"></th:block>
+</head>
+<body>
+<div class="auth-split">
+    <div class="auth-split-brand">
+        <a th:href="@{/}" class="brand-lockup brand-lockup-light">
+            <img th:src="@{/images/logobt.png}" alt="BookTruck" class="logo-img">
+            <span class="brand-name">BookTruck</span>
+        </a>
+        <h2>Únete a BookTruck en menos de dos minutos.</h2>
+        <p>Elige el tipo de cuenta que necesitas. Puedes crear la otra más adelante si lo necesitas.</p>
+    </div>
+    <div class="auth-split-form">
+        <div class="auth-card">
+            <div class="auth-logo brand-lockup">
+                <img th:src="@{/images/logobt.png}" alt="BookTruck" class="logo-img">
+                <span class="brand-name">BookTruck</span>
+            </div>
+            <h1>¿Cómo quieres registrarte?</h1>
+
+            <div class="role-select-options">
+                <a th:href="@{/auth/registro/empresa}" class="btn btn-primary">Soy una empresa</a>
+                <a th:href="@{/auth/registro/transportador}" class="btn btn-secondary">Soy transportador</a>
+            </div>
+
+            <div class="auth-footer">
+                ¿Ya tienes cuenta? <a th:href="@{/auth/login}">Inicia sesión</a>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

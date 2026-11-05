@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Crear administrador - BookTruck Admin</title>
+    <th:block th:replace="~{fragments/head :: css}"></th:block>
+</head>
+<body>
+<div th:replace="~{fragments/navbar-admin :: nav}"></div>
+
+<main class="app-content">
+    <nav th:replace="~{fragments/breadcrumb :: trail(@{/admin/usuarios}, 'Usuarios', 'Crear administrador')}"></nav>
+    <h1>Crear administrador</h1>
+    <p class="app-subtitle">Esta cuenta tendrá acceso completo a la plataforma.</p>
+
+    <div class="alert alert-error" th:if="${error}" th:text="${error}"></div>
+
+    <section class="app-section">
+        <form th:action="@{/admin/usuarios/nuevo-admin}" th:object="${form}" method="post">
+            <div class="form-group">
+                <label for="email">Correo electrónico</label>
+                <input type="email" id="email" th:field="*{email}" class="form-control" required autofocus>
+            </div>
+            <div class="form-group">
+                <label for="password">Contraseña</label>
+                <input type="password" id="password" th:field="*{password}" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="confirmarPassword">Confirmar contraseña</label>
+                <input type="password" id="confirmarPassword" th:field="*{confirmarPassword}" class="form-control" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Crear administrador</button>
+        </form>
+    </section>
+
+    <p class="app-back-link"><a th:href="@{/admin/usuarios}">&larr; Volver a usuarios</a></p>
+    <footer th:replace="~{fragments/footer-app :: footer}"></footer>
+</main>
+</body>
+</html>

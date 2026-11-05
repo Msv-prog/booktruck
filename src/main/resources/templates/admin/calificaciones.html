@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Calificaciones - BookTruck Admin</title>
+    <th:block th:replace="~{fragments/head :: css}"></th:block>
+</head>
+<body>
+<div th:replace="~{fragments/navbar-admin :: nav}"></div>
+
+<main class="app-content">
+    <h1>Calificaciones</h1>
+    <p class="app-subtitle">Todas las calificaciones registradas en la plataforma.</p>
+
+    <form th:action="@{/admin/calificaciones}" method="get" class="filter-bar filter-bar-grid filter-bar-compacta">
+        <div class="filter-group filter-group-ancho">
+            <label for="evaluador">Calificado por</label>
+            <select id="evaluador" name="evaluador" class="form-control">
+                <option value="" th:selected="${evaluadorSeleccionado == null}">Todas</option>
+                <option value="EMPRESA" th:selected="${evaluadorSeleccionado != null and evaluadorSeleccionado.name() == 'EMPRESA'}">Empresa (califica al transportador)</option>
+                <option value="TRANSPORTADOR" th:selected="${evaluadorSeleccionado != null and evaluadorSeleccionado.name() == 'TRANSPORTADOR'}">Transportador (califica a la empresa)</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label for="puntuacion">Puntuación</label>
+            <select id="puntuacion" name="puntuacion" class="form-control">
+                <option value="">Todas</option>
+                <option th:each="p : ${ {'5', '4', '3', '2', '1'} }" th:value="${p}" th:text="${p + ' ★'}" th:selected="${p == puntuacion}"></option>
+                <option value="problema" th:selected="${puntuacion == 'problema'}">2 ★ o menos (con problema)</option>
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary">Filtrar</button>
+    </form>
+    <div th:replace="~{fragments/filtros :: resumen(${paginacion.total}, ${total}, ${hayFiltros}, '/admin/calificaciones', 'calificaciones')}"></div>
+
+    <section class="app-section">
+        <div class="table-responsive">
+        <table class="app-table" th:if="${not #lists.isEmpty(calificaciones)}">
+            <thead>
+            <tr>
+                <th>Viaje</th>
+                <th>Empresa</th>
+                <th>Transportador</th>
+                <th>Calificado por</th>
+                <th>Puntuación</th>
+                <th>Comentario</th>
+                <th>Fecha</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="calificacion : ${calificaciones}">
+                <td th:text="${calificacion.viaje.carga.origen} + ' → ' + ${calificacion.viaje.carga.destino}"></td>
+                <td th:text="${calificacion.empresa.razonSocial}"></td>
+                <td th:text="${calificacion.transportador.nombreCompleto}"></td>
+                <td th:text="${calificacion.evaluadorTipo}"></td>
+                <td th:text="${calificacion.puntuacion} + ' / 5'"></td>
+                <td th:text="${calificacion.comentario}"></td>
+                <td th:text="${#temporals.format(calificacion.fecha, 'dd/MM/yyyy HH:mm')}"></td>
+            </tr>
+            </tbody>
+        </table>
+        </div>
+        <nav th:replace="~{fragments/paginacion :: pager(${paginacion})}"></nav>
+        <div class="empty-state" th:if="${#lists.isEmpty(calificaciones) and not hayFiltros}">
+            <p>Todavía no hay calificaciones.</p>
+        </div>
+        <th:block th:if="${#lists.isEmpty(calificaciones) and hayFiltros}">
+            <div th:replace="~{fragments/filtros :: sin-resultados('/admin/calificaciones')}"></div>
+        </th:block>
+    </section>
+    <footer th:replace="~{fragments/footer-app :: footer}"></footer>
+</main>
+</body>
+</html>

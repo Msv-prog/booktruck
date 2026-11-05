@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Ofertas - BookTruck Admin</title>
+    <th:block th:replace="~{fragments/head :: css}"></th:block>
+</head>
+<body>
+<div th:replace="~{fragments/navbar-admin :: nav}"></div>
+
+<main class="app-content">
+    <h1>Ofertas</h1>
+    <p class="app-subtitle">Todas las ofertas realizadas en la plataforma.</p>
+
+    <form th:action="@{/admin/ofertas}" method="get" class="filter-bar filter-bar-grid filter-bar-compacta">
+        <div class="filter-group">
+            <label for="estado">Estado</label>
+            <select id="estado" name="estado" class="form-control">
+                <option value="" th:selected="${estadoSeleccionado == null}">Todas</option>
+                <option value="PENDIENTE" th:selected="${estadoSeleccionado != null and estadoSeleccionado.name() == 'PENDIENTE'}">Pendiente</option>
+                <option value="ACEPTADA" th:selected="${estadoSeleccionado != null and estadoSeleccionado.name() == 'ACEPTADA'}">Aceptada</option>
+                <option value="RECHAZADA" th:selected="${estadoSeleccionado != null and estadoSeleccionado.name() == 'RECHAZADA'}">Rechazada</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label for="empresaId">Empresa</label>
+            <select id="empresaId" name="empresaId" class="form-control">
+                <option value="">Todas</option>
+                <option th:each="e : ${empresas}" th:value="${e.id}" th:text="${e.razonSocial}" th:selected="${e.id == empresaId}"></option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label for="transportadorId">Transportador</label>
+            <select id="transportadorId" name="transportadorId" class="form-control">
+                <option value="">Todos</option>
+                <option th:each="t : ${transportadores}" th:value="${t.id}" th:text="${t.nombreCompleto}" th:selected="${t.id == transportadorId}"></option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label for="montoMinimo">Monto mín.</label>
+            <input type="number" min="0" step="1000" id="montoMinimo" name="montoMinimo" class="form-control" th:value="${montoMinimo}">
+        </div>
+        <div class="filter-group">
+            <label for="montoMaximo">Monto máx.</label>
+            <input type="number" min="0" step="1000" id="montoMaximo" name="montoMaximo" class="form-control" th:value="${montoMaximo}">
+        </div>
+        <button type="submit" class="btn btn-primary">Filtrar</button>
+    </form>
+    <div th:replace="~{fragments/filtros :: resumen(${paginacion.total}, ${total}, ${hayFiltros}, '/admin/ofertas', 'ofertas')}"></div>
+
+    <section class="app-section">
+        <div class="table-responsive">
+        <table class="app-table" th:if="${not #lists.isEmpty(ofertas)}">
+            <thead>
+            <tr>
+                <th>Carga</th>
+                <th>Empresa</th>
+                <th>Transportador</th>
+                <th>Vehículo</th>
+                <th>Monto</th>
+                <th>Fecha</th>
+                <th>Estado</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="oferta : ${ofertas}">
+                <td th:text="${oferta.carga.origen} + ' → ' + ${oferta.carga.destino}"></td>
+                <td th:text="${oferta.carga.empresa.razonSocial}"></td>
+                <td th:text="${oferta.transportador.nombreCompleto}"></td>
+                <td th:text="${oferta.vehiculo.placa}"></td>
+                <td class="celda-precio" th:text="${'$' + #numbers.formatDecimal(oferta.monto, 1, 'POINT', 0, 'COMMA')}"></td>
+                <td th:text="${#temporals.format(oferta.fechaOferta, 'dd/MM/yyyy HH:mm')}"></td>
+                <td th:insert="~{fragments/badge :: pill(${oferta.estado.name()})}"></td>
+            </tr>
+            </tbody>
+        </table>
+        </div>
+        <nav th:replace="~{fragments/paginacion :: pager(${paginacion})}"></nav>
+        <div class="empty-state" th:if="${#lists.isEmpty(ofertas) and not hayFiltros}">
+            <p>No hay ofertas registradas.</p>
+        </div>
+        <th:block th:if="${#lists.isEmpty(ofertas) and hayFiltros}">
+            <div th:replace="~{fragments/filtros :: sin-resultados('/admin/ofertas')}"></div>
+        </th:block>
+    </section>
+    <footer th:replace="~{fragments/footer-app :: footer}"></footer>
+</main>
+</body>
+</html>

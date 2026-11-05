@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>BookTruck - Carga y transporte conectados</title>
+    <meta name="description" content="BookTruck conecta empresas que necesitan transportar carga con transportadores disponibles, con seguimiento en tiempo real desde la publicación hasta la entrega.">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="BookTruck - Carga y transporte conectados">
+    <meta property="og:description" content="Publica cargas, recibe ofertas y sigue cada viaje en tiempo real desde que sale hasta que se entrega.">
+    <meta property="og:image" th:content="@{/images/logobt.png}">
+    <th:block th:replace="~{fragments/head :: css}"></th:block>
+</head>
+<body>
+<header th:replace="~{fragments/publico :: nav}"></header>
+
+<main>
+    <section class="landing-hero">
+        <div class="landing-hero-inner">
+            <h1>Conecta tu carga con el transportador correcto</h1>
+            <p class="landing-hero-subtitle">
+                BookTruck une empresas que necesitan mover mercancía con transportadores disponibles,
+                con seguimiento en tiempo real desde la publicación hasta la entrega.
+            </p>
+            <div class="landing-hero-cta">
+                <a th:href="@{/auth/registro/empresa}" class="btn btn-primary btn-auto">Publicar una carga</a>
+                <a th:href="@{/auth/registro/transportador}" class="btn btn-secondary btn-auto">Ofrecer transporte</a>
+            </div>
+        </div>
+    </section>
+
+    <section class="landing-features">
+        <div class="landing-section-inner">
+            <h2 class="landing-section-title">Todo lo que necesitas en un solo lugar</h2>
+            <div class="landing-feature-grid">
+                <div class="landing-feature-card scroll-reveal">
+                    <div class="landing-feature-icon">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="13" rx="2"></rect><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><path d="M3 13h18"></path></svg>
+                    </div>
+                    <h3>Para empresas</h3>
+                    <p>Publica tu carga, recibe ofertas de transportadores disponibles y elige la mejor opción.</p>
+                </div>
+                <div class="landing-feature-card scroll-reveal">
+                    <div class="landing-feature-icon">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="8" width="14" height="9"></rect><path d="M15 11h4l3 3v3h-7z"></path><circle cx="6" cy="19" r="1.6"></circle><circle cx="17.5" cy="19" r="1.6"></circle></svg>
+                    </div>
+                    <h3>Para transportadores</h3>
+                    <p>Encuentra cargas disponibles según tu ruta, oferta con tu vehículo y gestiona tus viajes.</p>
+                </div>
+                <div class="landing-feature-card scroll-reveal">
+                    <div class="landing-feature-icon">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.1-7-11a7 7 0 0 1 14 0c0 4.9-7 11-7 11z"></path><circle cx="12" cy="10" r="2.5"></circle></svg>
+                    </div>
+                    <h3>Seguimiento en tiempo real</h3>
+                    <p>Sigue la ubicación del viaje en un mapa en vivo, desde que sale hasta que se confirma la entrega.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="landing-steps" id="como-funciona">
+        <div class="landing-section-inner">
+            <h2 class="landing-section-title">Cómo funciona</h2>
+            <div class="landing-steps-grid">
+                <div class="landing-step scroll-reveal">
+                    <span class="landing-step-number">1</span>
+                    <h3>Publica o busca carga</h3>
+                    <p>La empresa publica origen, destino, peso y precio ofrecido. Los transportadores disponibles la ven al instante.</p>
+                </div>
+                <div class="landing-step scroll-reveal">
+                    <span class="landing-step-number">2</span>
+                    <h3>Negocia y asigna</h3>
+                    <p>Los transportadores ofertan con su vehículo, la empresa elige la oferta y se genera el viaje.</p>
+                </div>
+                <div class="landing-step scroll-reveal">
+                    <span class="landing-step-number">3</span>
+                    <h3>Sigue hasta la entrega</h3>
+                    <p>Ambas partes confirman la recepción para cerrar el viaje, con historial y calificación al final.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="landing-cta">
+        <div class="landing-section-inner landing-cta-inner">
+            <h2>Empieza a mover carga hoy</h2>
+            <a th:href="@{/auth/registro}" class="btn btn-primary btn-auto">Crear cuenta gratis</a>
+        </div>
+    </section>
+</main>
+
+<footer th:replace="~{fragments/publico :: footer}"></footer>
+<script th:src="@{/js/scroll-reveal.js}"></script>
+</body>
+</html>

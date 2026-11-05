@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<!-- Barra de avance: "3 de 5 documentos aprobados". p: VerificacionService.Progreso -->
+<div th:fragment="progreso(p)" class="progreso-verificacion" th:classappend="${p.completo} ? 'is-completo' : ''">
+    <div class="progreso-verificacion-texto">
+        <strong th:text="${p.completo ? '¡Verificación completa!' : p.aprobados + ' de ' + p.total + ' documentos aprobados'}"></strong>
+        <span th:unless="${p.completo}">Cuando todos estén aprobados y vigentes quedarás habilitado.</span>
+    </div>
+    <div class="progreso-barra" role="progressbar" th:attr="aria-valuenow=${p.porcentaje}" aria-valuemin="0" aria-valuemax="100">
+        <span th:style="${'width:' + p.porcentaje + '%'}"></span>
+    </div>
+</div>
+
+<!--
+    Una tarjeta por tipo de documento requerido, con su estado y su formulario de subida.
+    tipos: lista de TipoDocumento · documentos: Map<TipoDocumento, Documento> · urlBase: ruta a la que
+    se agrega "/{TIPO}" para subir y "/{TIPO}/archivo" para ver el archivo actual.
+-->
+<div th:fragment="tarjetas(tipos, documentos, urlBase)" class="doc-grid">
+    <div class="doc-card" th:each="tipo : ${tipos}" th:with="doc=${documentos.get(tipo)}">
+        <div class="doc-card-header">
+            <strong th:text="${tipo.etiqueta}">Documento</strong>
+            <th:block th:replace="~{fragments/documentos :: estado(${doc})}"></th:block>
+        </div>
+        <p class="doc-card-descripcion" th:text="${tipo.descripcion}"></p>
+
+        <p class="doc-card-motivo" th:if="${doc != null and doc.estado.name() == 'RECHAZADO'}"
+           th:text="${'Motivo del rechazo: ' + doc.motivoRechazo}"></p>
+
+        <p class="doc-card-archivo" th:if="${doc != null}">
+            <a th:href="@{${urlBase + '/' + tipo.name() + '/archivo'}}" target="_blank" th:text="${doc.nombreOriginal}"></a>
+            <span th:if="${doc.fechaVencimiento != null}"
+                  th:text="${' · vence el ' + #temporals.format(doc.fechaVencimiento, 'dd/MM/yyyy')}"></span>
+        </p>
+
+        <form th:action="@{${urlBase + '/' + tipo.name()}}" method="post" enctype="multipart/form-data" class="doc-card-form">
+            <input type="file" name="archivo" class="form-control" accept=".pdf,.jpg,.jpeg,.png" data-max-mb="5" required>
+            <div class="doc-card-vencimiento" th:if="${tipo.vence}">
+                <label th:for="${'venc-' + tipo.name()}">Fecha de vencimiento</label>
+                <input type="date" th:id="${'venc-' + tipo.name()}" name="fechaVencimiento" class="form-control" required
+                       th:attr="min=${#temporals.format(#temporals.createToday(), 'yyyy-MM-dd')}">
+            </div>
+            <button type="submit" class="btn btn-secondary btn-auto" th:text="${doc == null ? 'Subir' : 'Reemplazar'}">Subir</button>
+        </form>
+    </div>
+</div>
+
+<!--
+    Revisión del administrador: una tarjeta por tipo, con el archivo, sus fechas y las acciones
+    aprobar / rechazar (con motivo). Las acciones van a /admin/documentos/{id}/...
+-->
+<div th:fragment="revision(tipos, documentos)" class="doc-grid">
+    <div class="doc-card" th:each="tipo : ${tipos}" th:with="doc=${documentos.get(tipo)}">
+        <div class="doc-card-header">
+            <strong th:text="${tipo.etiqueta}">Documento</strong>
+            <th:block th:replace="~{fragments/documentos :: estado(${doc})}"></th:block>
+        </div>
+        <p class="doc-card-descripcion" th:text="${tipo.descripcion}"></p>
+
+        <p class="doc-card-descripcion" th:if="${doc == null}">Todavía no lo ha subido.</p>
+
+        <th:block th:if="${doc != null}">
+            <p class="doc-card-archivo">
+                <a th:href="@{/admin/documentos/{id}/archivo(id=${doc.id})}" target="_blank" th:text="${doc.nombreOriginal}"></a>
+            </p>
+            <p class="doc-card-descripcion">
+                <span th:text="${'Subido el ' + #temporals.format(doc.fechaSubida, 'dd/MM/yyyy HH:mm')}"></span>
+                <span th:if="${doc.fechaVencimiento != null}" th:text="${' · vence el ' + #temporals.format(doc.fechaVencimiento, 'dd/MM/yyyy')}"></span>
+                <span th:if="${doc.fechaRevision != null}" th:text="${' · revisado el ' + #temporals.format(doc.fechaRevision, 'dd/MM/yyyy HH:mm')}"></span>
+            </p>
+            <p class="doc-card-motivo" th:if="${doc.estado.name() == 'RECHAZADO'}" th:text="${'Motivo: ' + doc.motivoRechazo}"></p>
+
+            <div class="doc-card-form">
+                <form th:if="${doc.estado.name() != 'APROBADO'}" th:action="@{/admin/documentos/{id}/aprobar(id=${doc.id})}" method="post">
+                    <button type="submit" class="btn btn-primary btn-auto">Aprobar</button>
+                </form>
+                <form th:action="@{/admin/documentos/{id}/rechazar(id=${doc.id})}" method="post" class="doc-card-rechazo">
+                    <input type="text" name="motivo" class="form-control" maxlength="255" required
+                           th:placeholder="${doc.estado.name() == 'RECHAZADO' ? 'Cambiar motivo del rechazo' : 'Motivo del rechazo'}">
+                    <button type="submit" class="btn btn-secondary btn-auto">Rechazar</button>
+                </form>
+            </div>
+        </th:block>
+    </div>
+</div>
+
+<!-- Estado general de una cuenta o vehículo según sus documentos obligatorios -->
+<div th:fragment="resumen-estado(estado)" class="estado-documentos">
+    <span class="badge"
+          th:classappend="${estado.name() == 'APROBADO' ? 'badge-exito' : (estado.name() == 'RECHAZADO' ? 'badge-error' : 'badge-advertencia')}"
+          th:text="${estado.name() == 'APROBADO' ? 'Verificado' : (estado.name() == 'RECHAZADO' ? 'Con rechazos' : 'Incompleto')}"></span>
+    <span th:text="${estado.name() == 'APROBADO' ? 'Todos los documentos obligatorios están aprobados y vigentes.'
+                  : (estado.name() == 'RECHAZADO' ? 'Hay documentos rechazados: debe subir unos nuevos.'
+                  : 'Faltan documentos, hay alguno en revisión o alguno se venció.')}"></span>
+</div>
+
+<!-- Etiqueta de estado de un documento (o "Falta" si no se ha subido) -->
+<span th:fragment="estado(doc)" class="badge"
+      th:classappend="${doc == null ? 'badge-neutral'
+                     : (doc.vencido or doc.estado.name() == 'RECHAZADO' ? 'badge-error'
+                     : (doc.estado.name() == 'PENDIENTE' or doc.porVencer ? 'badge-advertencia' : 'badge-exito'))}"
+      th:text="${doc == null ? 'Falta'
+             : (doc.vencido ? 'Vencido'
+             : (doc.estado.name() == 'RECHAZADO' ? 'Rechazado'
+             : (doc.estado.name() == 'PENDIENTE' ? 'En revisión'
+             : (doc.porVencer ? 'Vence en ' + doc.diasParaVencer + ' días' : 'Aprobado'))))}">Falta</span>
+</body>
+</html>

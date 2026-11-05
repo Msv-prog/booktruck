@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Auditoría - BookTruck Admin</title>
+    <th:block th:replace="~{fragments/head :: css}"></th:block>
+</head>
+<body>
+<div th:replace="~{fragments/navbar-admin :: nav}"></div>
+
+<main class="app-content">
+    <h1>Auditoría</h1>
+    <p class="app-subtitle">Acciones de los administradores: quién aprobó, rechazó, activó o canceló qué, y cuándo.</p>
+
+    <form th:action="@{/admin/auditoria}" method="get" class="filter-bar filter-bar-grid filter-bar-compacta">
+        <div class="filter-group">
+            <label for="accion">Acción</label>
+            <select id="accion" name="accion" class="form-control">
+                <option value="">Todas</option>
+                <option th:each="a : ${acciones}" th:value="${a.key}" th:text="${a.value}" th:selected="${a.key == accion}"></option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label for="adminId">Administrador</label>
+            <select id="adminId" name="adminId" class="form-control">
+                <option value="">Todos</option>
+                <option th:each="u : ${admins}" th:value="${u.id}" th:text="${u.email}" th:selected="${u.id == adminId}"></option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label for="desde">Desde</label>
+            <input type="date" id="desde" name="desde" class="form-control" th:value="${desde}">
+        </div>
+        <div class="filter-group">
+            <label for="hasta">Hasta</label>
+            <input type="date" id="hasta" name="hasta" class="form-control" th:value="${hasta}">
+        </div>
+        <div class="filter-group filter-group-ancho">
+            <label for="busqueda">Detalle</label>
+            <input type="text" id="busqueda" name="busqueda" class="form-control" th:value="${busqueda}" placeholder="Buscar por placa, nombre, correo…">
+        </div>
+        <button type="submit" class="btn btn-primary">Filtrar</button>
+    </form>
+    <div th:replace="~{fragments/filtros :: resumen(${paginacion.total}, ${total}, ${hayFiltros}, '/admin/auditoria', 'registros')}"></div>
+
+    <section class="app-section">
+        <div class="table-responsive">
+        <table class="app-table" th:if="${not #lists.isEmpty(registros)}">
+            <thead>
+            <tr>
+                <th>Fecha</th>
+                <th>Administrador</th>
+                <th>Acción</th>
+                <th>Detalle</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="r : ${registros}">
+                <td th:text="${#temporals.format(r.fecha, 'dd/MM/yyyy HH:mm')}"></td>
+                <td th:text="${r.usuario.email}"></td>
+                <td th:text="${acciones.containsKey(r.accion) ? acciones.get(r.accion) : r.accion}"></td>
+                <td th:text="${r.detalle}"></td>
+            </tr>
+            </tbody>
+        </table>
+        </div>
+        <nav th:replace="~{fragments/paginacion :: pager(${paginacion})}"></nav>
+        <div class="empty-state" th:if="${#lists.isEmpty(registros) and not hayFiltros}">
+            <p>Todavía no hay acciones registradas. Se registran desde que se activó la auditoría.</p>
+        </div>
+        <th:block th:if="${#lists.isEmpty(registros) and hayFiltros}">
+            <div th:replace="~{fragments/filtros :: sin-resultados('/admin/auditoria')}"></div>
+        </th:block>
+    </section>
+    <footer th:replace="~{fragments/footer-app :: footer}"></footer>
+</main>
+</body>
+</html>

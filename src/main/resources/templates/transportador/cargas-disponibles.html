@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Cargas disponibles - BookTruck</title>
+    <th:block th:replace="~{fragments/head :: css}"></th:block>
+</head>
+<body>
+<div th:replace="~{fragments/navbar-transportador :: nav}"></div>
+
+<main class="app-content">
+    <h1>Cargas disponibles</h1>
+    <p class="app-subtitle">Cargas publicadas por empresas, a la espera de ofertas.</p>
+
+    <div class="alert alert-success" th:if="${param.ofertaEnviada}">Oferta enviada correctamente.</div>
+    <div class="alert alert-error" th:if="${param.error}">No fue posible completar esa acción.</div>
+    <div class="alert alert-success" th:if="${exito}" th:text="${exito}"></div>
+    <div class="alert alert-error" th:if="${error}" th:text="${error}"></div>
+
+    <form th:action="@{/transportador/cargas}" method="get" class="filter-bar filter-bar-grid">
+        <div class="filter-group">
+            <label for="departamentoOrigen">Origen</label>
+            <div class="filter-group-row">
+                <select id="departamentoOrigen" class="form-control"></select>
+                <select id="ciudadOrigen" class="form-control"></select>
+            </div>
+            <input type="hidden" id="origen" name="origen" th:value="${origen}">
+        </div>
+        <div class="filter-group">
+            <label for="departamentoDestino">Destino</label>
+            <div class="filter-group-row">
+                <select id="departamentoDestino" class="form-control"></select>
+                <select id="ciudadDestino" class="form-control"></select>
+            </div>
+            <input type="hidden" id="destino" name="destino" th:value="${destino}">
+        </div>
+        <div class="filter-group">
+            <label for="tipoMercanciaSelect">Tipo de mercancía</label>
+            <select id="tipoMercanciaSelect" class="form-control" data-lista="TIPOS_MERCANCIA" data-target="tipoMercancia"></select>
+            <input type="text" id="tipoMercanciaOtro" class="form-control" placeholder="Especifica el tipo de mercancía" hidden>
+            <input type="hidden" id="tipoMercancia" name="tipoMercancia" th:value="${tipoMercancia}">
+        </div>
+        <div class="filter-group">
+            <label for="pesoMaximo">Peso máx. (ton)</label>
+            <input type="number" step="0.01" min="0" id="pesoMaximo" name="pesoMaximo" class="form-control" th:value="${pesoMaximo}">
+        </div>
+        <div class="filter-group">
+            <label for="precioMinimo">Precio mín.</label>
+            <input type="number" step="0.01" min="0" id="precioMinimo" name="precioMinimo" class="form-control" th:value="${precioMinimo}">
+        </div>
+        <div class="filter-group">
+            <label for="precioMaximo">Precio máx.</label>
+            <input type="number" step="0.01" min="0" id="precioMaximo" name="precioMaximo" class="form-control" th:value="${precioMaximo}">
+        </div>
+        <div class="filter-group">
+            <label for="orden">Ordenar por</label>
+            <select id="orden" name="orden" class="form-control">
+                <option value="recientes" th:selected="${orden == 'recientes'}">Más recientes</option>
+                <option value="precio_mayor" th:selected="${orden == 'precio_mayor'}">Mayor precio</option>
+                <option value="precio_menor" th:selected="${orden == 'precio_menor'}">Menor precio</option>
+                <option value="peso_menor" th:selected="${orden == 'peso_menor'}">Menor peso</option>
+                <option value="recoleccion" th:selected="${orden == 'recoleccion'}">Recolección más próxima</option>
+            </select>
+        </div>
+        <label class="interruptor">
+            <input type="checkbox" name="puedoTomar" value="true" th:checked="${puedoTomar}" onchange="this.form.submit()">
+            <span>Solo las que puedo tomar</span>
+        </label>
+        <button type="submit" class="btn btn-primary">Filtrar</button>
+    </form>
+    <p class="app-subtitle" th:if="${puedoTomar}">
+        Mostrando solo cargas en las que alguno de tus vehículos libres cabe, tiene la carrocería pedida, tu licencia lo permite y tiene los documentos al día.
+    </p>
+
+    <section class="app-section">
+        <div class="table-responsive">
+        <table class="app-table" th:if="${not #lists.isEmpty(cargas)}">
+            <thead>
+            <tr>
+                <th>Ruta</th>
+                <th>Mercancía</th>
+                <th>Precio ofrecido</th>
+                <th>Recolección</th>
+                <th>Acciones</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="carga : ${cargas}"
+                th:with="oferta=${ofertaPorCarga.get(carga.id)}, resumenEmpresa=${@calificacionService.resumenEmpresa(carga.empresa.id)},
+                         puedeOfertar=${oferta == null or cargasReofertables.contains(carga.id)}">
+                <td>
+                    <span class="celda-principal" th:text="${carga.origen + ' → ' + carga.destino}"></span>
+                    <span class="celda-secundaria" th:text="${carga.empresa.razonSocial}"></span>
+                </td>
+                <td>
+                    <span class="celda-principal" th:text="${carga.tipoMercancia}"></span>
+                    <span class="celda-secundaria" th:text="${carga.peso + ' ton · ' + carga.carroceriaTexto}"></span>
+                    <span class="badge badge-exito" th:if="${verificado and cargasQuePuedeTomar.contains(carga.id)}">Tienes vehículo</span>
+                </td>
+                <td class="celda-precio" th:text="${'$' + #numbers.formatDecimal(carga.precioOfrecido, 1, 'POINT', 0, 'COMMA')}"></td>
+                <td th:text="${#temporals.format(carga.fechaRecoleccion, 'dd/MM/yyyy HH:mm')}"></td>
+                <td>
+                    <div class="celda-acciones">
+                        <button type="button" class="btn-link js-ver-detalle"
+                                th:attr="data-detalle=${'detalle-carga-' + carga.id}"
+                                data-detalle-titulo="Detalles de la carga">Ver detalles</button>
+                        <a th:if="${oferta == null and verificado}"
+                           th:href="@{/transportador/cargas/{id}/ofertar(id=${carga.id})}">Ofertar</a>
+                        <form th:if="${oferta != null and oferta.estado.name() == 'PENDIENTE'}"
+                              th:action="@{/transportador/cargas/{id}/ofertar/retirar(id=${carga.id})}" method="post"
+                              class="js-confirm" data-confirm-message="¿Confirmas retirar tu oferta para esta carga?">
+                            <button type="submit" class="btn-link">Retirar oferta</button>
+                        </form>
+                        <th:block th:if="${oferta != null and oferta.estado.name() != 'PENDIENTE'}">
+                            <span th:insert="~{fragments/badge :: pill(${oferta.estado.name()})}"></span>
+                            <a th:if="${cargasReofertables.contains(carga.id) and verificado}"
+                               th:href="@{/transportador/cargas/{id}/ofertar(id=${carga.id})}">Volver a ofertar</a>
+                        </th:block>
+                        <th:block th:if="${puedeOfertar and not verificado}">
+                            <span th:replace="~{fragments/aviso-verificacion :: bloqueado('Verifica tu cuenta', '/transportador/perfil')}"></span>
+                        </th:block>
+                    </div>
+                    <template th:id="${'detalle-carga-' + carga.id}">
+                        <dl class="detalle-lista">
+                            <dt>Empresa</dt>
+                            <dd th:text="${carga.empresa.razonSocial}"></dd>
+                            <dt>Reputación</dt>
+                            <dd th:insert="~{fragments/calificacion :: resumen(${resumenEmpresa})}"></dd>
+                            <th:block th:replace="~{fragments/detalle-modal :: filas-carga(${carga})}"></th:block>
+                            <th:block th:if="${oferta != null}">
+                                <dt>Tu oferta</dt>
+                                <dd th:insert="~{fragments/badge :: pill(${oferta.estado.name()})}"></dd>
+                            </th:block>
+                        </dl>
+                        <div class="modal-actions" th:if="${puedeOfertar and verificado}">
+                            <a class="btn btn-primary" th:href="@{/transportador/cargas/{id}/ofertar(id=${carga.id})}"
+                               th:text="${oferta == null ? 'Ofertar' : 'Volver a ofertar'}">Ofertar</a>
+                        </div>
+                        <th:block th:if="${puedeOfertar and not verificado}">
+                            <span th:replace="~{fragments/aviso-verificacion :: bloqueado('Verifica tu cuenta para ofertar', '/transportador/perfil')}"></span>
+                        </th:block>
+                    </template>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+        </div>
+        <div class="empty-state" th:if="${#lists.isEmpty(cargas)}">
+            <p>No hay cargas disponibles con ese filtro.</p>
+            <a th:if="${origen != null or destino != null or tipoMercancia != null or pesoMaximo != null or precioMinimo != null or precioMaximo != null or puedoTomar}" th:href="@{/transportador/cargas}" class="btn btn-primary">Quitar filtros</a>
+        </div>
+    </section>
+    <footer th:replace="~{fragments/footer-app :: footer}"></footer>
+</main>
+<div th:replace="~{fragments/confirm-modal :: modal}"></div>
+<div th:replace="~{fragments/detalle-modal :: modal}"></div>
+<script th:src="@{/js/confirm.js}"></script>
+<script th:src="@{/js/detalle-modal.js}"></script>
+<script th:src="@{/js/listas-colombia.js}"></script>
+<script th:src="@{/js/select-otro.js}"></script>
+<script th:src="@{/js/origen-destino.js}"></script>
+</body>
+</html>

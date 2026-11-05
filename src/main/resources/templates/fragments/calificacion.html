@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<span th:fragment="resumen(resumen)" class="rating-summary">
+    <span th:if="${resumen.cantidad} == 0" class="rating-empty">Sin calificaciones aún</span>
+    <span th:if="${resumen.cantidad} &gt; 0" class="rating-stars">
+        ★ <span th:text="${#numbers.formatDecimal(resumen.promedio, 1, 1)}">0.0</span>
+        <span class="rating-count">(<span th:text="${resumen.cantidad}">0</span> <span th:text="${resumen.cantidad} == 1 ? 'viaje' : 'viajes'">viajes</span>)</span>
+    </span>
+</span>
+</body>
+</html>

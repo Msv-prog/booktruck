@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Marcar entrega - BookTruck</title>
+    <th:block th:replace="~{fragments/head :: css}"></th:block>
+</head>
+<body>
+<div th:replace="~{fragments/navbar-transportador :: nav}"></div>
+
+<main class="app-content">
+    <nav th:replace="~{fragments/breadcrumb :: trail(@{/transportador/viajes}, 'Mis viajes', 'Marcar entrega')}"></nav>
+    <h1>Marcar como entregado</h1>
+    <p class="app-subtitle"
+       th:text="${viaje.carga.origen + ' → ' + viaje.carga.destino + ' · ' + viaje.carga.empresa.razonSocial + ' · ' + viaje.vehiculo.placa}"></p>
+
+    <div class="alert alert-error" th:if="${error}" th:text="${error}"></div>
+
+    <section class="app-section">
+        <p>Sube la <strong>prueba de entrega</strong>: una foto de la mercancía entregada o la remesa firmada por quien recibió.
+            La empresa la revisará antes de confirmar la recepción.</p>
+        <form th:action="@{/transportador/viajes/{id}/entregar(id=${viaje.id})}" method="post" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="prueba">Prueba de entrega (PDF, JPG o PNG, máx. 5 MB)</label>
+                <input type="file" id="prueba" name="prueba" class="form-control" accept=".pdf,.jpg,.jpeg,.png"
+                       data-max-mb="5" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Confirmar entrega</button>
+        </form>
+    </section>
+
+    <p class="app-back-link"><a th:href="@{/transportador/viajes}">&larr; Volver a mis viajes</a></p>
+    <footer th:replace="~{fragments/footer-app :: footer}"></footer>
+</main>
+<script th:src="@{/js/archivo-limite.js}"></script>
+</body>
+</html>

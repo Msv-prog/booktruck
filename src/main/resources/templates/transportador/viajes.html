@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Mis viajes - BookTruck</title>
+    <th:block th:replace="~{fragments/head :: css}"></th:block>
+</head>
+<body>
+<div th:replace="~{fragments/navbar-transportador :: nav}"></div>
+
+<main class="app-content">
+    <h1>Mis viajes</h1>
+    <p class="app-subtitle">Viajes generados a partir de tus ofertas aceptadas.</p>
+
+    <div class="alert alert-error" th:if="${error}" th:text="${error}"></div>
+    <div class="alert alert-success" th:if="${exito}" th:text="${exito}"></div>
+
+    <section class="app-section">
+        <div class="table-responsive">
+        <table class="app-table" th:if="${not #lists.isEmpty(viajes)}">
+            <thead>
+            <tr>
+                <th>Ruta</th>
+                <th>Vehículo</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="viaje : ${viajes}">
+                <td>
+                    <span class="celda-principal" th:text="${viaje.carga.origen + ' → ' + viaje.carga.destino}"></span>
+                    <span class="celda-secundaria" th:text="${viaje.carga.empresa.razonSocial}"></span>
+                </td>
+                <td th:text="${viaje.vehiculo.placa}"></td>
+                <td>
+                    <span th:insert="~{fragments/badge :: pill(${viaje.estado.name()})}"></span>
+                    <span th:insert="~{fragments/motivo-cancelacion :: texto(${viaje.motivoCancelacion})}"></span>
+                    <span class="celda-secundaria" th:if="${viaje.estado.name() == 'ENTREGADO'}">Esperando confirmación de la empresa</span>
+                    <span class="celda-secundaria texto-error" th:if="${viaje.atrasado}">Atrasado: ya pasó la hora de recolección</span>
+                </td>
+                <td>
+                    <div class="celda-acciones">
+                        <button type="button" class="btn-link js-ver-detalle"
+                                th:attr="data-detalle=${'detalle-viaje-' + viaje.id}"
+                                data-detalle-titulo="Detalles del viaje">Ver detalles</button>
+                        <a th:href="@{/transportador/viajes/{id}(id=${viaje.id})}">Ver viaje</a>
+                        <form th:if="${viaje.estado.name() == 'PROGRAMADO'}"
+                              th:action="@{/transportador/viajes/{id}/iniciar(id=${viaje.id})}" method="post">
+                            <button type="submit" class="btn-link">Iniciar viaje</button>
+                        </form>
+                        <form th:if="${viaje.estado.name() == 'PROGRAMADO'}"
+                              th:action="@{/transportador/viajes/{id}/cancelar(id=${viaje.id})}" method="post"
+                              class="js-confirm" data-requiere-motivo
+                              data-confirm-message="¿Confirmas cancelar este viaje? Indica el motivo.">
+                            <button type="submit" class="btn-link">Cancelar viaje</button>
+                        </form>
+                        <a th:if="${viaje.estado.name() == 'EN_CURSO'}"
+                           th:href="@{/transportador/viajes/{id}/entregar(id=${viaje.id})}">Marcar como entregado</a>
+                        <a th:if="${viaje.tienePruebaEntrega}" target="_blank"
+                           th:href="@{/transportador/viajes/{id}/prueba-entrega(id=${viaje.id})}">Prueba de entrega</a>
+                        <a th:href="@{/transportador/viajes/{id}/ubicacion(id=${viaje.id})}">Ubicación</a>
+                        <span th:if="${viaje.estado.name() == 'FINALIZADO' and viajesCalificados.contains(viaje.id)}">Calificado ✓</span>
+                        <a th:if="${viaje.estado.name() == 'FINALIZADO' and not viajesCalificados.contains(viaje.id)}"
+                           th:href="@{/transportador/viajes/{id}/calificar(id=${viaje.id})}">Calificar</a>
+                    </div>
+                    <template th:id="${'detalle-viaje-' + viaje.id}">
+                        <dl class="detalle-lista">
+                            <th:block th:replace="~{fragments/detalle-modal :: filas-viaje(${viaje}, true)}"></th:block>
+                        </dl>
+                    </template>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+        </div>
+        <div class="empty-state" th:if="${#lists.isEmpty(viajes)}">
+            <p>Todavía no tienes viajes generados.</p>
+        </div>
+    </section>
+    <footer th:replace="~{fragments/footer-app :: footer}"></footer>
+</main>
+<div th:replace="~{fragments/confirm-modal :: modal}"></div>
+<div th:replace="~{fragments/detalle-modal :: modal}"></div>
+<script th:src="@{/js/confirm.js}"></script>
+<script th:src="@{/js/detalle-modal.js}"></script>
+</body>
+</html>

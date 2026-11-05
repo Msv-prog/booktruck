@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="stepper(viaje)" th:with="estadoNombre=${viaje.estado.name()}">
+    <div class="viaje-timeline" th:classappend="${estadoNombre == 'CANCELADO'} ? 'is-cancelada'">
+        <div class="viaje-timeline-step"
+             th:classappend="${estadoNombre == 'PROGRAMADO'} ? 'is-active' : (${estadoNombre == 'EN_CURSO' or estadoNombre == 'ENTREGADO' or estadoNombre == 'FINALIZADO'} ? 'is-completado' : 'is-pendiente')">
+            <span class="viaje-timeline-dot"></span>
+            <span class="viaje-timeline-label">Programado</span>
+        </div>
+        <div class="viaje-timeline-step"
+             th:classappend="${estadoNombre == 'EN_CURSO'} ? 'is-active' : (${estadoNombre == 'ENTREGADO' or estadoNombre == 'FINALIZADO'} ? 'is-completado' : 'is-pendiente')">
+            <span class="viaje-timeline-dot"></span>
+            <span class="viaje-timeline-label">En curso</span>
+        </div>
+        <div class="viaje-timeline-step"
+             th:classappend="${estadoNombre == 'ENTREGADO'} ? 'is-active' : (${estadoNombre == 'FINALIZADO'} ? 'is-completado' : 'is-pendiente')">
+            <span class="viaje-timeline-dot"></span>
+            <span class="viaje-timeline-label">Entregado</span>
+        </div>
+        <div class="viaje-timeline-step"
+             th:classappend="${estadoNombre == 'FINALIZADO'} ? 'is-active' : 'is-pendiente'">
+            <span class="viaje-timeline-dot"></span>
+            <span class="viaje-timeline-label">Finalizado</span>
+        </div>
+    </div>
+    <p class="viaje-timeline-cancelada" th:if="${estadoNombre == 'CANCELADO'}">
+        Este viaje fue cancelado.
+        <span th:insert="~{fragments/motivo-cancelacion :: texto(${viaje.motivoCancelacion})}"></span>
+    </p>
+</div>
+</body>
+</html>

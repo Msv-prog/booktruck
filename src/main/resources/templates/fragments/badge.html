@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<span th:fragment="pill(valor)"
+      th:class="${(valor == 'ACEPTADA' or valor == 'FINALIZADO' or valor == 'COMPLETADA' or valor == 'Activo' or valor == 'Activa' or valor == 'Sí' or valor == 'APROBADO')
+            ? 'badge badge-exito'
+            : ((valor == 'RECHAZADA' or valor == 'CANCELADA' or valor == 'CANCELADO' or valor == 'RECHAZADO')
+                ? 'badge badge-error'
+                : ((valor == 'PENDIENTE' or valor == 'PROGRAMADO' or valor == 'EN_CURSO' or valor == 'EN_PROCESO' or valor == 'ENTREGADO')
+                    ? 'badge badge-advertencia'
+                    : 'badge badge-neutral'))}"
+      th:text="${valor}">badge</span>
+</body>
+</html>

@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Solicitud no válida - BookTruck</title>
+    <th:block th:replace="~{fragments/head :: css}"></th:block>
+</head>
+<body>
+<div class="error-page">
+    <div>
+        <div class="brand-lockup">
+            <img th:src="@{/images/logobt.png}" alt="BookTruck" class="logo-img">
+            <span class="brand-name">BookTruck</span>
+        </div>
+        <div class="error-page-code">400</div>
+        <h1>No pudimos entender esa solicitud</h1>
+        <p>Algún dato del enlace no tiene un formato válido (por ejemplo, un filtro modificado a mano).</p>
+        <a href="javascript:history.back()" class="btn btn-secondary btn-auto">Volver atrás</a>
+        <a th:href="@{/}" class="btn btn-primary btn-auto">Volver al inicio</a>
+    </div>
+</div>
+</body>
+</html>

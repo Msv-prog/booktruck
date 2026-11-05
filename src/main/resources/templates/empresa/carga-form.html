@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title th:text="${cargaEditada != null ? 'Editar carga - BookTruck' : 'Publicar carga - BookTruck'}">Publicar carga - BookTruck</title>
+    <th:block th:replace="~{fragments/head :: css}"></th:block>
+</head>
+<body>
+<div th:replace="~{fragments/navbar-empresa :: nav}"></div>
+
+<main class="app-content" th:with="editando=${cargaEditada != null},
+        vencida=${cargaEditada != null and cargaEditada.estado.name() == 'VENCIDA'}">
+    <nav th:replace="~{fragments/breadcrumb :: trail(@{/empresa/cargas}, 'Mis cargas', ${editando ? (vencida ? 'Volver a publicar' : 'Editar carga') : 'Publicar carga'})}"></nav>
+    <h1 th:text="${editando ? (vencida ? 'Volver a publicar carga' : 'Editar carga') : 'Publicar carga'}">Publicar carga</h1>
+    <p class="app-subtitle" th:unless="${editando}">Completa los datos de la carga que quieres transportar.</p>
+    <p class="app-subtitle" th:if="${vencida}">Esta carga venció sin ser asignada. Escoge una fecha de recolección nueva para publicarla otra vez.</p>
+    <p class="app-subtitle" th:if="${editando and not vencida and ofertasPendientes > 0}"
+       th:text="${'Tiene ' + ofertasPendientes + (ofertasPendientes == 1 ? ' oferta pendiente' : ' ofertas pendientes')
+                 + '. Si cambias la ruta, la mercancía, el peso, la carrocería o la fecha, se cerrarán para que los transportadores vuelvan a ofertar con los datos nuevos. Cambiar direcciones o precio no las afecta.'}"></p>
+
+    <div class="alert alert-error" th:if="${error}" th:text="${error}"></div>
+
+    <section class="app-section" th:unless="${@verificacionService.empresaVerificada(empresa)}">
+        <div class="empty-state">
+            <p>Para publicar cargas, tu cuenta debe estar verificada por el administrador.</p>
+            <a th:href="@{/empresa/perfil}" class="btn btn-primary">Ir a mi perfil</a>
+        </div>
+    </section>
+
+    <section class="app-section" th:if="${@verificacionService.empresaVerificada(empresa)}">
+        <form th:action="${editando} ? @{/empresa/cargas/{id}/editar(id=${cargaEditada.id})} : @{/empresa/cargas/nueva}"
+              th:object="${form}" method="post" id="form-carga">
+            <div class="form-group">
+                <label for="departamentoOrigen">Origen</label>
+                <div style="display: flex; gap: 8px;">
+                    <select id="departamentoOrigen" class="form-control"></select>
+                    <select id="ciudadOrigen" class="form-control"></select>
+                </div>
+                <input type="hidden" id="origen" th:field="*{origen}">
+            </div>
+            <div class="form-group">
+                <label for="departamentoDestino">Destino</label>
+                <div style="display: flex; gap: 8px;">
+                    <select id="departamentoDestino" class="form-control"></select>
+                    <select id="ciudadDestino" class="form-control"></select>
+                </div>
+                <input type="hidden" id="destino" th:field="*{destino}">
+            </div>
+            <div class="form-group">
+                <label for="direccionOrigen">Dirección de origen</label>
+                <input type="text" id="direccionOrigen" th:field="*{direccionOrigen}" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="direccionDestino">Dirección de destino</label>
+                <input type="text" id="direccionDestino" th:field="*{direccionDestino}" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="tipoMercanciaSelect">Tipo de mercancía</label>
+                <select id="tipoMercanciaSelect" class="form-control" data-lista="TIPOS_MERCANCIA" data-target="tipoMercancia"></select>
+                <input type="text" id="tipoMercanciaOtro" class="form-control" placeholder="Especifica el tipo de mercancía" hidden style="margin-top: 8px;">
+                <input type="hidden" id="tipoMercancia" th:field="*{tipoMercancia}">
+            </div>
+            <div class="form-group">
+                <label for="peso">Peso (toneladas)</label>
+                <input type="number" step="0.01" min="0.01" id="peso" th:field="*{peso}" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="carroceriaRequerida">Carrocería requerida</label>
+                <select id="carroceriaRequerida" th:field="*{carroceriaRequerida}" class="form-control">
+                    <option value="">Cualquiera</option>
+                    <option value="ESTACAS">Estacas</option>
+                    <option value="FURGON">Furgón (caja cerrada)</option>
+                    <option value="PLANCHA">Plancha</option>
+                    <option value="CONTENEDOR">Contenedor</option>
+                    <option value="REFRIGERADO">Refrigerado</option>
+                    <option value="TOLVA">Tolva (granel)</option>
+                </select>
+                <small class="app-subtitle">Solo podrán ofertar los vehículos con esta carrocería. Déjalo en "Cualquiera" si no importa.</small>
+            </div>
+            <div class="form-group">
+                <label for="precioOfrecido">Precio ofrecido (COP)</label>
+                <input type="number" step="0.01" min="0" id="precioOfrecido" th:field="*{precioOfrecido}" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="fechaRecoleccion">Fecha de recolección</label>
+                <input type="datetime-local" id="fechaRecoleccion" th:field="*{fechaRecoleccion}" class="form-control" required>
+            </div>
+            <button type="submit" class="btn btn-primary"
+                    th:text="${editando ? (vencida ? 'Volver a publicar' : 'Guardar cambios') : 'Publicar carga'}">Publicar carga</button>
+        </form>
+    </section>
+    <footer th:replace="~{fragments/footer-app :: footer}"></footer>
+</main>
+<script th:src="@{/js/listas-colombia.js}"></script>
+<script th:src="@{/js/select-otro.js}"></script>
+<script th:src="@{/js/origen-destino.js}"></script>
+<div id="resumen-carga-overlay" class="modal-overlay">
+    <div class="modal-box modal-box-detalle" role="dialog" aria-modal="true" aria-labelledby="resumen-carga-titulo">
+        <h2 id="resumen-carga-titulo">Revisa los datos antes de enviar</h2>
+        <dl class="detalle-lista" id="resumen-carga-lista"></dl>
+        <div class="modal-actions">
+            <button type="button" id="resumen-carga-volver" class="btn btn-secondary">Volver a editar</button>
+            <button type="button" id="resumen-carga-confirmar" class="btn btn-primary"
+                    th:text="${cargaEditada != null ? 'Confirmar cambios' : 'Publicar carga'}">Publicar carga</button>
+        </div>
+    </div>
+</div>
+<script th:src="@{/js/carga-resumen.js}"></script>
+</body>
+</html>

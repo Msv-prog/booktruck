@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Vehículos - BookTruck Admin</title>
+    <th:block th:replace="~{fragments/head :: css}"></th:block>
+</head>
+<body>
+<div th:replace="~{fragments/navbar-admin :: nav}"></div>
+
+<main class="app-content">
+    <h1>Vehículos</h1>
+    <p class="app-subtitle">Todos los vehículos registrados en la plataforma.</p>
+
+    <div class="alert alert-error" th:if="${error}" th:text="${error}"></div>
+
+    <form th:action="@{/admin/vehiculos}" method="get" class="filter-bar filter-bar-grid filter-bar-compacta">
+        <div class="filter-group">
+            <label for="tipo">Tipo</label>
+            <select id="tipo" name="tipo" class="form-control">
+                <option value="">Todos</option>
+                <option value="SENCILLO" th:selected="${tipo != null and tipo.name() == 'SENCILLO'}">Sencillo</option>
+                <option value="ARTICULADO" th:selected="${tipo != null and tipo.name() == 'ARTICULADO'}">Articulado</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label for="carroceria">Carrocería</label>
+            <select id="carroceria" name="carroceria" class="form-control">
+                <option value="">Todas</option>
+                <option th:each="c : ${carrocerias}" th:value="${c.name()}"
+                        th:text="${#strings.capitalize(#strings.toLowerCase(c.name()))}"
+                        th:selected="${carroceria != null and carroceria == c}"></option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label for="activo">Estado</label>
+            <select id="activo" name="activo" class="form-control">
+                <option value="">Todos</option>
+                <option value="true" th:selected="${activo == true}">Activo</option>
+                <option value="false" th:selected="${activo == false}">Inactivo</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label for="placa">Placa</label>
+            <input type="text" id="placa" name="placa" class="form-control" th:value="${placa}" placeholder="Ej: KLM482">
+        </div>
+        <button type="submit" class="btn btn-primary">Filtrar</button>
+    </form>
+    <div th:replace="~{fragments/filtros :: resumen(${paginacion.total}, ${total}, ${hayFiltros}, '/admin/vehiculos', 'vehículos')}"></div>
+
+    <section class="app-section">
+        <div class="table-responsive">
+        <table class="app-table" th:if="${not #lists.isEmpty(vehiculos)}">
+            <thead>
+            <tr>
+                <th>Placa</th>
+                <th>Tipo</th>
+                <th>Marca</th>
+                <th>Capacidad (ton)</th>
+                <th>Tipo de carrocería</th>
+                <th>Transportador</th>
+                <th>Estado</th>
+                <th>Documentos</th>
+                <th>Acción</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="vehiculo : ${vehiculos}">
+                <td th:text="${vehiculo.placa}"></td>
+                <td>
+                    <span class="celda-principal" th:text="${vehiculo.tipoVehiculo.name() == 'ARTICULADO'} ? 'Articulado' : 'Sencillo'"></span>
+                    <span class="celda-secundaria" th:text="${vehiculo.licenciaRequerida != null
+                            ? vehiculo.clasePeso + ' · requiere ' + vehiculo.licenciaRequerida.name()
+                            : 'Sin peso bruto'}"></span>
+                </td>
+                <td th:text="${vehiculo.marca}"></td>
+                <td th:text="${vehiculo.capacidadToneladas}"></td>
+                <td th:text="${vehiculo.tipoCarroceria}"></td>
+                <td th:text="${vehiculo.transportador.nombreCompleto}"></td>
+                <td th:insert="~{fragments/badge :: pill(${vehiculo.activo} ? 'Activo' : 'Inactivo')}"></td>
+                <td th:with="docs=${estadoDocumentos.get(vehiculo.id).name()}">
+                    <div class="celda-acciones">
+                        <span class="badge"
+                              th:classappend="${docs == 'APROBADO' ? 'badge-exito' : (docs == 'RECHAZADO' ? 'badge-error' : 'badge-advertencia')}"
+                              th:text="${docs == 'APROBADO' ? 'Al día' : (docs == 'RECHAZADO' ? 'Rechazado' : 'Pendiente')}"></span>
+                        <a th:href="@{/admin/vehiculos/{id}/verificar(id=${vehiculo.id})}">Revisar</a>
+                    </div>
+                </td>
+                <td>
+                    <form th:action="@{/admin/vehiculos/{id}/estado(id=${vehiculo.id})}" method="post"
+                          class="js-confirm" data-confirm-message="¿Confirmas cambiar el estado de este vehículo?">
+                        <button type="submit" class="btn-link" th:text="${vehiculo.activo} ? 'Desactivar' : 'Activar'"></button>
+                    </form>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+        </div>
+        <nav th:replace="~{fragments/paginacion :: pager(${paginacion})}"></nav>
+        <div class="empty-state" th:if="${#lists.isEmpty(vehiculos) and not hayFiltros}">
+            <p>No hay vehículos registrados.</p>
+        </div>
+        <th:block th:if="${#lists.isEmpty(vehiculos) and hayFiltros}">
+            <div th:replace="~{fragments/filtros :: sin-resultados('/admin/vehiculos')}"></div>
+        </th:block>
+    </section>
+    <footer th:replace="~{fragments/footer-app :: footer}"></footer>
+</main>
+<div th:replace="~{fragments/confirm-modal :: modal}"></div>
+<script th:src="@{/js/confirm.js}"></script>
+</body>
+</html>

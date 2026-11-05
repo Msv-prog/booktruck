@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Inicio - BookTruck</title>
+    <th:block th:replace="~{fragments/head :: css}"></th:block>
+</head>
+<body>
+<div th:replace="~{fragments/navbar-transportador :: nav}"></div>
+
+<main class="app-content">
+    <h1>Hola, <span th:text="${transportador.nombreCompleto}"></span></h1>
+    <p class="app-subtitle">Resumen de tu actividad en BookTruck.</p>
+
+    <div class="stat-grid">
+        <a th:href="@{/transportador/vehiculos}" class="stat-card">
+            <span class="stat-value" th:text="${resumen.vehiculosActivos}"></span>
+            <span class="stat-label">Vehículos activos</span>
+        </a>
+        <a th:href="@{/transportador/ofertas}" class="stat-card">
+            <span class="stat-value" th:text="${resumen.ofertasPendientes}"></span>
+            <span class="stat-label">Ofertas pendientes</span>
+        </a>
+        <a th:href="@{/transportador/viajes}" class="stat-card">
+            <span class="stat-value" th:text="${resumen.viajesEnCurso}"></span>
+            <span class="stat-label">Viajes en curso</span>
+        </a>
+    </div>
+
+    <section class="app-section">
+        <h2>Disponibilidad</h2>
+        <p class="app-subtitle">
+            Estado actual:
+            <strong th:text="${transportador.disponible} ? 'Disponible' : 'No disponible'"></strong>
+        </p>
+        <form th:action="@{/transportador/disponibilidad}" method="post">
+            <button type="submit" class="btn btn-primary"
+                    th:text="${transportador.disponible} ? 'Marcar como no disponible' : 'Marcar como disponible'"></button>
+        </form>
+    </section>
+    <section class="grafica-grid">
+        <div class="grafica-tarjeta">
+            <h2>Lo que recibiste por mes (neto)</h2>
+            <div class="grafica-lienzo"><canvas data-grafica="gananciasPorMes" data-tipo="barras" data-dinero aria-label="Ganancias netas por mes"></canvas></div>
+            <p class="grafica-vacia">Aún no tienes viajes finalizados en los últimos 6 meses.</p>
+        </div>
+        <div class="grafica-tarjeta">
+            <h2>Tus viajes por estado</h2>
+            <div class="grafica-lienzo"><canvas data-grafica="viajesPorEstado" data-tipo="dona" aria-label="Viajes por estado"></canvas></div>
+            <p class="grafica-vacia">Todavía no tienes viajes.</p>
+        </div>
+    </section>    <footer th:replace="~{fragments/footer-app :: footer}"></footer>
+</main>
+<script th:inline="javascript">window.datosGraficas = /*[[${graficas}]]*/ {};</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script th:src="@{/js/graficas.js}"></script></body>
+</html>

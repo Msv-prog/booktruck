@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Verificar transportador - BookTruck Admin</title>
+    <th:block th:replace="~{fragments/head :: css}"></th:block>
+</head>
+<body>
+<div th:replace="~{fragments/navbar-admin :: nav}"></div>
+
+<main class="app-content">
+    <nav th:replace="~{fragments/breadcrumb :: trail(@{/admin/transportadores}, 'Transportadores', 'Revisar documentos')}"></nav>
+    <h1>Revisar documentos</h1>
+    <p class="app-subtitle">
+        <span th:text="${transportador.nombreCompleto}"></span> ·
+        Cédula <span th:text="${transportador.cedula}"></span> ·
+        Licencia <span th:text="${transportador.licencia}"></span> ·
+        <span th:text="${transportador.usuario.email}"></span>
+    </p>
+
+    <div class="alert alert-success" th:if="${exito}" th:text="${exito}"></div>
+    <div class="alert alert-error" th:if="${error}" th:text="${error}"></div>
+
+    <section class="app-section">
+        <h2>Documentos del transportador</h2>
+        <div th:replace="~{fragments/documentos :: resumen-estado(${estadoDocumentos})}"></div>
+        <div th:replace="~{fragments/documentos :: revision(${tiposDocumento}, ${documentos})}"></div>
+    </section>
+
+    <section class="app-section">
+        <h2>Vehículos</h2>
+        <div class="table-responsive">
+        <table class="app-table" th:if="${not #lists.isEmpty(vehiculos)}">
+            <thead>
+            <tr>
+                <th>Placa</th>
+                <th>Tipo</th>
+                <th>Documentos</th>
+                <th>Acciones</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="vehiculo : ${vehiculos}" th:with="estado=${estadoVehiculos.get(vehiculo.id).name()}">
+                <td>
+                    <span class="celda-principal" th:text="${vehiculo.placa}"></span>
+                    <span class="celda-secundaria" th:text="${vehiculo.marca + ' · ' + vehiculo.capacidadToneladas + ' ton'}"></span>
+                </td>
+                <td>
+                    <span class="celda-principal" th:text="${vehiculo.tipoVehiculo.name() == 'ARTICULADO'} ? 'Articulado' : 'Sencillo'"></span>
+                    <span class="celda-secundaria" th:text="${vehiculo.licenciaRequerida != null
+                            ? 'Requiere ' + vehiculo.licenciaRequerida.name()
+                            : 'Sin peso bruto'}"></span>
+                </td>
+                <td>
+                    <span class="badge"
+                          th:classappend="${estado == 'APROBADO' ? 'badge-exito' : (estado == 'RECHAZADO' ? 'badge-error' : 'badge-advertencia')}"
+                          th:text="${estado == 'APROBADO' ? 'Al día' : (estado == 'RECHAZADO' ? 'Rechazado' : 'Pendiente')}"></span>
+                </td>
+                <td><a th:href="@{/admin/vehiculos/{id}/verificar(id=${vehiculo.id})}">Revisar documentos</a></td>
+            </tr>
+            </tbody>
+        </table>
+        </div>
+        <div class="empty-state" th:if="${#lists.isEmpty(vehiculos)}">
+            <p>Este transportador todavía no ha registrado vehículos.</p>
+        </div>
+    </section>
+
+    <p class="app-back-link"><a th:href="@{/admin/transportadores}">&larr; Volver a transportadores</a></p>
+    <footer th:replace="~{fragments/footer-app :: footer}"></footer>
+</main>
+</body>
+</html>

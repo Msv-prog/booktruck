@@ -1,0 +1,99 @@
+﻿<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Mis cargas - BookTruck</title>
+    <th:block th:replace="~{fragments/head :: css}"></th:block>
+</head>
+<body>
+<div th:replace="~{fragments/navbar-empresa :: nav}"></div>
+
+<main class="app-content">
+    <h1>Mis cargas</h1>
+    <p class="app-subtitle">Todas las cargas que has publicado.</p>
+
+    <div class="alert alert-error" th:if="${param.error}">No tienes permiso sobre esa carga.</div>
+    <div class="alert alert-error" th:if="${error}" th:text="${error}"></div>
+    <div class="alert alert-success" th:if="${exito}" th:text="${exito}"></div>
+
+    <form th:action="@{/empresa/cargas}" method="get" class="filter-bar">
+        <label for="estado">Estado</label>
+        <select id="estado" name="estado" onchange="this.form.submit()">
+            <option value="" th:selected="${estadoSeleccionado == null}">Todas</option>
+            <option value="PUBLICADA" th:selected="${estadoSeleccionado != null and estadoSeleccionado.name() == 'PUBLICADA'}">Publicada</option>
+            <option value="EN_PROCESO" th:selected="${estadoSeleccionado != null and estadoSeleccionado.name() == 'EN_PROCESO'}">En proceso</option>
+            <option value="ASIGNADA" th:selected="${estadoSeleccionado != null and estadoSeleccionado.name() == 'ASIGNADA'}">Asignada</option>
+            <option value="COMPLETADA" th:selected="${estadoSeleccionado != null and estadoSeleccionado.name() == 'COMPLETADA'}">Completada</option>
+            <option value="CANCELADA" th:selected="${estadoSeleccionado != null and estadoSeleccionado.name() == 'CANCELADA'}">Cancelada</option>
+            <option value="VENCIDA" th:selected="${estadoSeleccionado != null and estadoSeleccionado.name() == 'VENCIDA'}">Vencida</option>
+        </select>
+    </form>
+
+    <section class="app-section">
+        <div class="table-responsive">
+        <table class="app-table" th:if="${not #lists.isEmpty(cargas)}">
+            <thead>
+            <tr>
+                <th>Ruta</th>
+                <th>Precio ofrecido</th>
+                <th>Recolección</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="carga : ${cargas}">
+                <td>
+                    <span class="celda-principal" th:text="${carga.origen + ' → ' + carga.destino}"></span>
+                    <span class="celda-secundaria" th:text="${carga.tipoMercancia + ' · ' + carga.peso + ' ton · ' + carga.carroceriaTexto}"></span>
+                </td>
+                <td class="celda-precio" th:text="${'$' + #numbers.formatDecimal(carga.precioOfrecido, 1, 'POINT', 0, 'COMMA')}"></td>
+                <td th:text="${#temporals.format(carga.fechaRecoleccion, 'dd/MM/yyyy HH:mm')}"></td>
+                <td>
+                    <span th:insert="~{fragments/badge :: pill(${carga.estado.name()})}"></span>
+                    <span class="celda-secundaria" th:if="${carga.estado.name() == 'VENCIDA'}">Nadie la tomó antes de la recolección</span>
+                </td>
+                <td>
+                    <div class="celda-acciones">
+                        <button type="button" class="btn-link js-ver-detalle"
+                                th:attr="data-detalle=${'detalle-carga-' + carga.id}"
+                                data-detalle-titulo="Detalles de la carga">Ver detalles</button>
+                        <a th:href="@{/empresa/cargas/{id}/ofertas(id=${carga.id})}">Ver ofertas</a>
+                        <a th:if="${carga.estado.name() == 'PUBLICADA'}" th:href="@{/empresa/cargas/{id}/editar(id=${carga.id})}">Editar</a>
+                        <a th:if="${carga.estado.name() == 'VENCIDA'}" th:href="@{/empresa/cargas/{id}/editar(id=${carga.id})}">Volver a publicar</a>
+                        <form th:if="${carga.estado.name() == 'PUBLICADA' or carga.estado.name() == 'VENCIDA'}"
+                              th:action="@{/empresa/cargas/{id}/cancelar(id=${carga.id})}" method="post"
+                              class="js-confirm" data-confirm-message="¿Confirmas cancelar esta carga? Se rechazarán las ofertas pendientes.">
+                            <button type="submit" class="btn-link">Cancelar</button>
+                        </form>
+                    </div>
+                    <template th:id="${'detalle-carga-' + carga.id}">
+                        <dl class="detalle-lista">
+                            <th:block th:replace="~{fragments/detalle-modal :: filas-carga(${carga})}"></th:block>
+                            <dt>Estado</dt>
+                            <dd th:insert="~{fragments/badge :: pill(${carga.estado.name()})}"></dd>
+                        </dl>
+                        <div class="modal-actions">
+                            <a class="btn btn-primary" th:href="@{/empresa/cargas/{id}/ofertas(id=${carga.id})}">Ver ofertas</a>
+                        </div>
+                    </template>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+        </div>
+        <div class="empty-state" th:if="${#lists.isEmpty(cargas)}">
+            <p>No hay cargas para este filtro.</p>
+            <a th:if="${@verificacionService.empresaVerificada(empresa)}" th:href="@{/empresa/cargas/nueva}" class="btn btn-primary">Publicar una carga</a>
+            <th:block th:unless="${@verificacionService.empresaVerificada(empresa)}">
+                <span th:replace="~{fragments/aviso-verificacion :: bloqueado('Verifica tu cuenta para publicar cargas', '/empresa/perfil')}"></span>
+            </th:block>
+        </div>
+    </section>
+    <footer th:replace="~{fragments/footer-app :: footer}"></footer>
+</main>
+<div th:replace="~{fragments/confirm-modal :: modal}"></div>
+<div th:replace="~{fragments/detalle-modal :: modal}"></div>
+<script th:src="@{/js/confirm.js}"></script>
+<script th:src="@{/js/detalle-modal.js}"></script>
+</body>
+</html>

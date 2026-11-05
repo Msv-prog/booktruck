@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<!--
+    Línea bajo los filtros del admin: "Mostrando X de Y" y el enlace para quitar los filtros.
+    nombre: cómo se llaman los registros en plural (ej. 'usuarios')
+-->
+<div th:fragment="resumen(mostrados, total, hayFiltros, urlLimpia, nombre)" class="filtros-resumen">
+    <span th:text="${hayFiltros ? 'Mostrando ' + mostrados + ' de ' + total + ' ' + nombre : total + ' ' + nombre}"></span>
+    <a th:if="${hayFiltros}" th:href="@{${urlLimpia}}">Quitar filtros</a>
+</div>
+
+<!-- Estado vacío cuando hay datos, pero ninguno coincide con los filtros -->
+<div th:fragment="sin-resultados(urlLimpia)" class="empty-state">
+    <p>Ningún registro coincide con los filtros.</p>
+    <a th:href="@{${urlLimpia}}" class="btn btn-primary">Quitar filtros</a>
+</div>
+</body>
+</html>

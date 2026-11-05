@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<!--
+    Aviso fijo de la cuenta (se incluye desde el navbar de empresa y de transportador).
+    aviso: VerificacionService.Aviso, o null si no hay nada que avisar. Lo arma el servicio según
+    los documentos: rechazados o vencidos (rojo, bloquea), faltantes o en revisión, y por vencer.
+-->
+<div th:fragment="aviso(aviso)" th:if="${aviso != null}"
+     class="aviso-verificacion" th:classappend="${aviso.nivel() == 'error'} ? 'aviso-verificacion-error'" role="status">
+    <div class="aviso-verificacion-texto">
+        <strong th:text="${aviso.titulo()}">Verifica tu cuenta</strong>
+        <span th:each="linea : ${aviso.lineas()}" th:text="${linea}"></span>
+    </div>
+    <a th:if="${aviso.enlaceUrl() != null}" th:href="@{${aviso.enlaceUrl()}}" class="btn btn-primary btn-auto"
+       th:text="${aviso.enlaceTexto()}">Subir documentos</a>
+</div>
+
+<!-- Reemplazo de un botón de acción bloqueado para cuentas sin verificar -->
+<span th:fragment="bloqueado(texto, urlPerfil)" class="accion-bloqueada">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"></rect><path d="M8 11V7a4 4 0 0 1 8 0v4"></path></svg>
+    <a th:href="@{${urlPerfil}}" th:text="${texto}">Verifica tu cuenta</a>
+</span>
+</body>
+</html>

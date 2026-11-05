@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Perfil de empresa - BookTruck</title>
+    <th:block th:replace="~{fragments/head :: css}"></th:block>
+</head>
+<body>
+<div th:replace="~{fragments/navbar-empresa :: nav}"></div>
+
+<main class="app-content">
+    <h1>Perfil de empresa</h1>
+    <p class="app-subtitle">Consulta y actualiza los datos de tu empresa.</p>
+
+    <div class="alert alert-error" th:if="${error}" th:text="${error}"></div>
+    <div class="alert alert-success" th:if="${exito}" th:text="${exito}"></div>
+
+    <div class="profile-rating">
+        <div th:replace="~{fragments/calificacion :: resumen(${resumenCalificacion})}"></div>
+    </div>
+
+    <section class="app-section">
+        <div th:replace="~{fragments/foto-perfil :: editor(${empresa.usuario}, ${empresa.iniciales}, '/empresa', 'logo')}"></div>
+        <div class="form-group">
+            <label>Correo electrónico</label>
+            <input type="text" class="form-control" th:value="${empresa.usuario.email}" disabled>
+        </div>
+        <div class="form-group">
+            <label>NIT</label>
+            <input type="text" class="form-control" th:value="${empresa.nit}" disabled>
+        </div>
+
+        <form th:action="@{/empresa/perfil}" th:object="${form}" method="post">
+            <div class="form-group">
+                <label for="razonSocial">Razón social</label>
+                <input type="text" id="razonSocial" th:field="*{razonSocial}" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="telefono">Teléfono</label>
+                <input type="text" id="telefono" th:field="*{telefono}" class="form-control" maxlength="10" inputmode="numeric" required>
+            </div>
+            <div class="form-group">
+                <label for="ciudadSelect">Ciudad</label>
+                <select id="ciudadSelect" class="form-control" data-lista="CIUDADES_PRINCIPALES" data-target="ciudad"></select>
+                <input type="text" id="ciudadOtro" class="form-control" placeholder="Especifica la ciudad" hidden style="margin-top: 8px;">
+                <input type="hidden" id="ciudad" th:field="*{ciudad}">
+            </div>
+            <div class="form-group">
+                <label for="direccion">Dirección</label>
+                <input type="text" id="direccion" th:field="*{direccion}" class="form-control" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Guardar cambios</button>
+        </form>
+    </section>
+
+    <section class="app-section" id="documentos">
+        <h2>Documentos de verificación</h2>
+        <p class="app-subtitle">
+            Sube cada documento por separado (PDF, JPG o PNG, máx. 5 MB). El administrador los revisa uno por uno.
+        </p>
+        <div class="alert alert-error" th:if="${errorDocumento}" th:text="${errorDocumento}"></div>
+        <div class="alert alert-success" th:if="${exitoDocumento}" th:text="${exitoDocumento}"></div>
+        <div th:replace="~{fragments/documentos :: progreso(${progreso})}"></div>
+        <div th:replace="~{fragments/documentos :: tarjetas(${tiposDocumento}, ${documentos}, '/empresa/perfil/documentos')}"></div>
+    </section>
+
+    <section class="app-section">
+        <h2>Contraseña</h2>
+        <button type="button" class="btn-link" id="btn-mostrar-password"
+                th:unless="${errorPassword != null or exitoPassword != null}"
+                onclick="document.getElementById('bloque-password').hidden = false; this.hidden = true;">
+            Cambiar mi contraseña
+        </button>
+        <div id="bloque-password" th:hidden="${errorPassword == null and exitoPassword == null}">
+            <div class="alert alert-error" th:if="${errorPassword}" th:text="${errorPassword}"></div>
+            <div class="alert alert-success" th:if="${exitoPassword}" th:text="${exitoPassword}"></div>
+            <form th:action="@{/empresa/perfil/password}" method="post">
+                <div class="form-group">
+                    <label for="passwordActual">Contraseña actual</label>
+                    <input type="password" id="passwordActual" name="passwordActual" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="passwordNueva">Nueva contraseña</label>
+                    <input type="password" id="passwordNueva" name="passwordNueva" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="confirmarPasswordNueva">Confirmar nueva contraseña</label>
+                    <input type="password" id="confirmarPasswordNueva" name="confirmarPasswordNueva" class="form-control" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Cambiar contraseña</button>
+            </form>
+        </div>
+    </section>
+
+    <section class="app-section danger-zone">
+        <h2>Desactivar cuenta</h2>
+        <p>Al desactivar tu cuenta no podrás iniciar sesión de nuevo. Para reactivarla deberás contactar a un administrador.</p>
+        <form th:action="@{/empresa/cuenta/desactivar}" method="post"
+              class="js-confirm" data-confirm-message="¿Seguro que quieres desactivar tu cuenta? No podrás iniciar sesión hasta que un administrador la reactive.">
+            <button type="submit" class="btn btn-danger">Desactivar mi cuenta</button>
+        </form>
+    </section>
+    <footer th:replace="~{fragments/footer-app :: footer}"></footer>
+</main>
+<div th:replace="~{fragments/confirm-modal :: modal}"></div>
+<script th:src="@{/js/confirm.js}"></script>
+<script th:src="@{/js/archivo-limite.js}"></script>
+<script th:src="@{/js/listas-colombia.js}"></script>
+<script th:src="@{/js/select-otro.js}"></script>
+</body>
+</html>

@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Términos y condiciones - BookTruck</title>
+    <th:block th:replace="~{fragments/head :: css}"></th:block>
+</head>
+<body>
+<header th:replace="~{fragments/publico :: nav}"></header>
+
+<main class="legal-page">
+    <h1>Términos y condiciones</h1>
+    <p class="legal-actualizacion">Última actualización: 1 de octubre de 2026</p>
+    <div class="legal-aviso">
+        Documento de ejemplo elaborado con fines académicos. No ha sido revisado por un abogado y no constituye asesoría legal.
+    </div>
+
+    <h2>1. Aceptación</h2>
+    <p>
+        Al registrarte y usar BookTruck aceptas estos términos. Si no estás de acuerdo con ellos, no debes crear una cuenta
+        ni usar la plataforma.
+    </p>
+
+    <h2>2. Qué es BookTruck</h2>
+    <p>
+        BookTruck es una plataforma digital que conecta a empresas que necesitan transportar carga con transportadores
+        independientes que ofrecen ese servicio. BookTruck actúa únicamente como intermediario: no es una empresa de
+        transporte, no presta el servicio de transporte y no es propietario de los vehículos ni de la mercancía.
+    </p>
+
+    <h2>3. Registro y verificación de cuentas</h2>
+    <ul>
+        <li>Debes suministrar información veraz y mantenerla actualizada (NIT o cédula, teléfono, licencia, placas, etc.).</li>
+        <li>Eres responsable de la confidencialidad de tu contraseña y de toda la actividad realizada desde tu cuenta.</li>
+        <li>La verificación es obligatoria. Después de registrarte debes subir, cada uno por separado:
+            <strong>empresas</strong>: RUT, certificado de Cámara de Comercio (con menos de 30 días de expedido) y cédula del representante legal;
+            <strong>transportadores</strong>: cédula de ciudadanía y licencia de conducción vigente;
+            <strong>cada vehículo</strong>: licencia de tránsito, SOAT y revisión técnico-mecánica vigentes.</li>
+        <li>Un administrador revisa cada documento y lo aprueba o lo rechaza indicando el motivo. Tu cuenta queda verificada cuando todos tus documentos obligatorios están aprobados y vigentes.</li>
+        <li>Mientras tu cuenta no esté verificada podrás iniciar sesión y consultar la plataforma, pero no publicar cargas, aceptar ofertas ni ofertar. Solo podrás ofertar con vehículos cuyos documentos estén aprobados y vigentes.</li>
+        <li>Si un documento con fecha de vencimiento (licencia de conducción, SOAT o técnico-mecánica) se vence, se bloquean las acciones nuevas hasta que subas uno vigente y sea aprobado. Los viajes que ya estén en curso se pueden terminar. La plataforma te avisa desde 30 días antes del vencimiento.</li>
+    </ul>
+
+    <h2>4. Obligaciones de las empresas</h2>
+    <ul>
+        <li>Publicar cargas con información real: origen, destino, direcciones, tipo de mercancía, peso, precio y fecha de recolección.</li>
+        <li>No publicar mercancía prohibida por la ley ni que requiera permisos especiales sin contar con ellos.</li>
+        <li>Indicar la carrocería que exige la mercancía cuando sea necesaria (por ejemplo, refrigerado para alimentos
+            perecederos); solo podrán ofertar los vehículos con esa carrocería.</li>
+        <li>Una carga publicada que llega a su fecha de recolección sin ser asignada queda <strong>vencida</strong> y sus
+            ofertas pendientes se cierran. La empresa puede editarla con una fecha nueva para volver a publicarla.</li>
+        <li>Revisar la prueba de entrega y confirmar la recepción de la carga una vez el transportador la entregue.</li>
+    </ul>
+
+    <h2>5. Obligaciones de los transportadores</h2>
+    <ul>
+        <li>Contar con licencia de conducción vigente y con los documentos del vehículo al día.</li>
+        <li>Conducir solo vehículos que su licencia permita, según el peso bruto vehicular: C1 hasta 3.500 kg,
+            C2 camiones rígidos hasta 10.000 kg y C3 vehículos articulados o de más de 10.000 kg (una categoría mayor
+            incluye las menores). La plataforma no permite registrar ni ofertar con vehículos fuera de la categoría.</li>
+        <li>Ofertar solo con vehículos que tengan la capacidad y el tipo adecuados para la carga.</li>
+        <li>Cumplir los viajes aceptados, actualizar su estado en la plataforma y entregar la mercancía en las condiciones recibidas.</li>
+        <li>Al marcar un viaje como entregado, subir una prueba de entrega (foto de la mercancía entregada o remesa firmada).</li>
+    </ul>
+
+    <h2>6. Ofertas, viajes y comisión</h2>
+    <p>
+        Los transportadores envían ofertas sobre las cargas publicadas y la empresa elige una. Al seleccionar una oferta se
+        genera un viaje y las demás ofertas se rechazan. Cuando la empresa confirma la recepción, el viaje se da por
+        finalizado y BookTruck cobra una comisión del
+        <strong th:text="${#numbers.formatDecimal(@viajeService.porcentajeComision, 1, 'POINT', 0, 'COMMA') + '%'}">3%</strong>
+        sobre el monto acordado, que se descuenta del valor que recibe el transportador. La empresa no paga recargos
+        adicionales por usar la plataforma.
+    </p>
+
+    <h2>7. Cancelaciones</h2>
+    <p>
+        La empresa o el transportador pueden cancelar un viaje mientras esté programado, indicando el motivo. Una vez el
+        viaje está en curso, solo un administrador de BookTruck puede cancelarlo. Los viajes cancelados no generan comisión.
+        La plataforma registra quién canceló cada viaje, y las empresas ven en cada oferta cuántos viajes ha cancelado el
+        transportador. Si un viaje programado no se inicia dentro de las 2 horas siguientes a la hora de recolección, se marca
+        como atrasado y la empresa puede cancelarlo. Si al cancelarse un viaje ya pasó la fecha de recolección, la carga queda
+        vencida en vez de volver a publicarse.
+    </p>
+
+    <h2>8. Calificaciones</h2>
+    <p>
+        Al finalizar un viaje, empresa y transportador pueden calificarse mutuamente. Las calificaciones deben ser honestas y
+        respetuosas, y los administradores de BookTruck pueden revisarlas para detectar casos problemáticos.
+    </p>
+
+    <h2>9. Responsabilidad</h2>
+    <p>
+        El contrato de transporte se celebra directamente entre la empresa y el transportador. BookTruck no responde por
+        pérdidas, daños o retrasos de la mercancía, ni por incumplimientos entre las partes, sin perjuicio de los derechos que
+        la ley colombiana les reconoce.
+    </p>
+
+    <h2>10. Suspensión de cuentas</h2>
+    <p>
+        BookTruck puede suspender o desactivar cuentas que suministren información falsa, incumplan estos términos o hagan un
+        uso indebido de la plataforma.
+    </p>
+
+    <h2>11. Cambios a estos términos</h2>
+    <p>
+        Podemos actualizar estos términos. La fecha de la última actualización aparece al inicio de esta página, y el uso
+        continuado de la plataforma implica la aceptación de los cambios.
+    </p>
+
+    <h2>12. Ley aplicable y contacto</h2>
+    <p>
+        Estos términos se rigen por las leyes de la República de Colombia. Para cualquier inquietud escríbenos a
+        <a href="mailto:contacto@booktruck.co">contacto@booktruck.co</a>.
+    </p>
+
+    <p class="legal-volver"><a th:href="@{/}">&larr; Volver al inicio</a></p>
+</main>
+
+<footer th:replace="~{fragments/publico :: footer}"></footer>
+</body>
+</html>

@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<!-- Footer discreto de las pantallas internas; se inserta al final de <main class="app-content"> -->
+<footer th:fragment="footer" class="app-footer">
+    <span th:text="${'© ' + #dates.year(#dates.createNow()) + ' BookTruck'}">© BookTruck</span>
+    <a th:href="@{/terminos}" target="_blank" rel="noopener">Términos</a>
+    <a th:href="@{/privacidad}" target="_blank" rel="noopener">Privacidad</a>
+    <a href="mailto:contacto@booktruck.co">contacto@booktruck.co</a>
+</footer>
+</body>
+</html>

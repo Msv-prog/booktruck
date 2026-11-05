@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Perfil de transportador - BookTruck</title>
+    <th:block th:replace="~{fragments/head :: css}"></th:block>
+</head>
+<body>
+<div th:replace="~{fragments/navbar-transportador :: nav}"></div>
+
+<main class="app-content">
+    <h1>Perfil de transportador</h1>
+    <p class="app-subtitle">Consulta y actualiza tus datos.</p>
+
+    <div class="alert alert-error" th:if="${error}" th:text="${error}"></div>
+    <div class="alert alert-success" th:if="${exito}" th:text="${exito}"></div>
+
+    <div class="profile-rating">
+        <div th:replace="~{fragments/calificacion :: resumen(${resumenCalificacion})}"></div>
+    </div>
+
+    <section class="app-section">
+        <div th:replace="~{fragments/foto-perfil :: editor(${transportador.usuario}, ${transportador.iniciales}, '/transportador', 'foto')}"></div>
+        <div class="form-group">
+            <label>Correo electrónico</label>
+            <input type="text" class="form-control" th:value="${transportador.usuario.email}" disabled>
+        </div>
+        <div class="form-group">
+            <label>Cédula</label>
+            <input type="text" class="form-control" th:value="${transportador.cedula}" disabled>
+        </div>
+
+        <form th:action="@{/transportador/perfil}" th:object="${form}" method="post">
+            <div class="form-group">
+                <label for="nombreCompleto">Nombre completo</label>
+                <input type="text" id="nombreCompleto" th:field="*{nombreCompleto}" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="telefono">Teléfono</label>
+                <input type="text" id="telefono" th:field="*{telefono}" class="form-control" maxlength="10" inputmode="numeric" required>
+            </div>
+            <div class="form-group">
+                <label for="licencia">Licencia de conducción</label>
+                <select id="licencia" th:field="*{licencia}" class="form-control" required>
+                    <option value="">Selecciona una categoría</option>
+                    <option value="C1">C1 - carga liviana (hasta 3.500 kg de peso bruto)</option>
+                    <option value="C2">C2 - camión rígido (hasta 10.000 kg de peso bruto)</option>
+                    <option value="C3">C3 - articulados y camiones de más de 10.000 kg</option>
+                </select>
+                <small class="app-subtitle">Si cambias la categoría, debes subir de nuevo tu licencia de conducción para que el administrador la verifique.</small>
+            </div>
+            <button type="submit" class="btn btn-primary">Guardar cambios</button>
+        </form>
+    </section>
+
+    <section class="app-section" id="documentos">
+        <h2>Documentos de verificación</h2>
+        <p class="app-subtitle">
+            Sube cada documento por separado (PDF, JPG o PNG, máx. 5 MB). El administrador los revisa uno por uno.
+            Los documentos de tus vehículos se suben desde <a th:href="@{/transportador/vehiculos}">Vehículos</a>.
+        </p>
+        <div class="alert alert-error" th:if="${errorDocumento}" th:text="${errorDocumento}"></div>
+        <div class="alert alert-success" th:if="${exitoDocumento}" th:text="${exitoDocumento}"></div>
+        <div th:replace="~{fragments/documentos :: progreso(${progreso})}"></div>
+        <div th:replace="~{fragments/documentos :: tarjetas(${tiposDocumento}, ${documentos}, '/transportador/perfil/documentos')}"></div>
+    </section>
+
+    <section class="app-section">
+        <h2>Contraseña</h2>
+        <button type="button" class="btn-link" id="btn-mostrar-password"
+                th:unless="${errorPassword != null or exitoPassword != null}"
+                onclick="document.getElementById('bloque-password').hidden = false; this.hidden = true;">
+            Cambiar mi contraseña
+        </button>
+        <div id="bloque-password" th:hidden="${errorPassword == null and exitoPassword == null}">
+            <div class="alert alert-error" th:if="${errorPassword}" th:text="${errorPassword}"></div>
+            <div class="alert alert-success" th:if="${exitoPassword}" th:text="${exitoPassword}"></div>
+            <form th:action="@{/transportador/perfil/password}" method="post">
+                <div class="form-group">
+                    <label for="passwordActual">Contraseña actual</label>
+                    <input type="password" id="passwordActual" name="passwordActual" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="passwordNueva">Nueva contraseña</label>
+                    <input type="password" id="passwordNueva" name="passwordNueva" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="confirmarPasswordNueva">Confirmar nueva contraseña</label>
+                    <input type="password" id="confirmarPasswordNueva" name="confirmarPasswordNueva" class="form-control" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Cambiar contraseña</button>
+            </form>
+        </div>
+    </section>
+
+    <section class="app-section danger-zone">
+        <h2>Desactivar cuenta</h2>
+        <p>Al desactivar tu cuenta no podrás iniciar sesión de nuevo. Para reactivarla deberás contactar a un administrador.</p>
+        <form th:action="@{/transportador/cuenta/desactivar}" method="post"
+              class="js-confirm" data-confirm-message="¿Seguro que quieres desactivar tu cuenta? No podrás iniciar sesión hasta que un administrador la reactive.">
+            <button type="submit" class="btn btn-danger">Desactivar mi cuenta</button>
+        </form>
+    </section>
+    <footer th:replace="~{fragments/footer-app :: footer}"></footer>
+</main>
+<div th:replace="~{fragments/confirm-modal :: modal}"></div>
+<script th:src="@{/js/confirm.js}"></script>
+<script th:src="@{/js/archivo-limite.js}"></script>
+</body>
+</html>

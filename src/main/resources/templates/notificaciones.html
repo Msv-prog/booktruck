@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Notificaciones - BookTruck</title>
+    <th:block th:replace="~{fragments/head :: css}"></th:block>
+</head>
+<body>
+<th:block th:if="${base == '/empresa'}">
+    <div th:replace="~{fragments/navbar-empresa :: nav}"></div>
+</th:block>
+<th:block th:if="${base == '/transportador'}">
+    <div th:replace="~{fragments/navbar-transportador :: nav}"></div>
+</th:block>
+
+<main class="app-content">
+    <h1>Notificaciones</h1>
+    <p class="app-subtitle">Lo que ha pasado con tus cargas, ofertas, viajes y documentos (últimas 50).</p>
+
+    <form th:if="${#lists.size(notificaciones.?[!leida]) > 0}" th:action="@{${base + '/notificaciones/leidas'}}" method="post">
+        <button type="submit" class="btn-link">Marcar todas como leídas</button>
+    </form>
+
+    <section class="app-section">
+        <ul class="lista-notificaciones" th:if="${not #lists.isEmpty(notificaciones)}">
+            <li th:each="n : ${notificaciones}" th:classappend="${n.leida} ? '' : 'no-leida'">
+                <form th:action="@{${base + '/notificaciones/' + n.id + '/abrir'}}" method="post">
+                    <button type="submit" class="notificacion-boton">
+                        <span class="notificacion-mensaje" th:text="${n.mensaje}"></span>
+                        <span class="celda-secundaria" th:text="${#temporals.format(n.fecha, 'dd/MM/yyyy HH:mm')}"></span>
+                    </button>
+                </form>
+            </li>
+        </ul>
+        <div class="empty-state" th:if="${#lists.isEmpty(notificaciones)}">
+            <p>No tienes notificaciones todavía.</p>
+        </div>
+    </section>
+    <footer th:replace="~{fragments/footer-app :: footer}"></footer>
+</main>
+</body>
+</html>

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Iniciar sesión - BookTruck</title>
+    <th:block th:replace="~{fragments/head :: css}"></th:block>
+</head>
+<body>
+<div class="auth-split">
+    <div class="auth-split-brand">
+        <a th:href="@{/}" class="brand-lockup brand-lockup-light">
+            <img th:src="@{/images/logobt.png}" alt="BookTruck" class="logo-img">
+            <span class="brand-name">BookTruck</span>
+        </a>
+        <h2>Carga y transporte, conectados en un solo lugar.</h2>
+        <p>Publica cargas, recibe ofertas y sigue cada viaje en tiempo real desde que sale hasta que se entrega.</p>
+    </div>
+    <div class="auth-split-form">
+        <div class="auth-card">
+            <div class="auth-logo brand-lockup">
+                <img th:src="@{/images/logobt.png}" alt="BookTruck" class="logo-img">
+                <span class="brand-name">BookTruck</span>
+            </div>
+            <h1>Iniciar sesión</h1>
+
+            <div class="alert alert-error" th:if="${param.error}">
+                Correo o contraseña incorrectos.
+            </div>
+            <div class="alert alert-error" th:if="${param.desactivada}">
+                Tu cuenta está desactivada. Contacta al administrador de BookTruck para reactivarla.
+            </div>
+            <div class="alert alert-success" th:if="${param.registrado}">
+                Cuenta creada correctamente. Inicia sesión y sube tus documentos desde tu perfil:
+                el administrador los revisará y, al aprobarlos, podrás empezar a operar.
+            </div>
+            <div class="alert alert-success" th:if="${param.logout}">
+                Sesión cerrada correctamente.
+            </div>
+            <div class="alert alert-success" th:if="${param.cuentaDesactivada}">
+                Tu cuenta fue desactivada correctamente. Contacta a un administrador si quieres reactivarla.
+            </div>
+
+            <form th:action="@{/auth/login}" method="post">
+                <div class="form-group">
+                    <label for="email">Correo electrónico</label>
+                    <input type="email" id="email" name="email" class="form-control" required autofocus>
+                </div>
+                <div class="form-group">
+                    <label for="password">Contraseña</label>
+                    <input type="password" id="password" name="password" class="form-control" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Ingresar</button>
+            </form>
+
+            <div class="auth-footer">
+                ¿No tienes cuenta? <a th:href="@{/auth/registro}">Regístrate</a>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

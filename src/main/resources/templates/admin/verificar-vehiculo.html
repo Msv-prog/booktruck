@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Verificar vehículo - BookTruck Admin</title>
+    <th:block th:replace="~{fragments/head :: css}"></th:block>
+</head>
+<body>
+<div th:replace="~{fragments/navbar-admin :: nav}"></div>
+
+<main class="app-content">
+    <nav th:replace="~{fragments/breadcrumb :: trail(@{/admin/vehiculos}, 'Vehículos', 'Revisar documentos')}"></nav>
+    <h1 th:text="${'Documentos del vehículo ' + vehiculo.placa}">Documentos del vehículo</h1>
+    <p class="app-subtitle">
+        <span th:text="${vehiculo.tipoVehiculo.name() == 'ARTICULADO'} ? 'Articulado' : 'Sencillo'"></span> ·
+        <span th:text="${vehiculo.marca + ' · ' + vehiculo.capacidadToneladas + ' ton'}"></span> ·
+        <span th:text="${vehiculo.pesoBrutoKg != null
+                ? 'Peso bruto ' + #numbers.formatInteger(vehiculo.pesoBrutoKg, 1, 'POINT') + ' kg (requiere ' + vehiculo.licenciaRequerida.name() + ')'
+                : 'Sin peso bruto'}"></span> ·
+        <a th:href="@{/admin/transportadores/{id}/verificar(id=${vehiculo.transportador.id})}"
+           th:text="${vehiculo.transportador.nombreCompleto + ' (licencia ' + vehiculo.transportador.licencia + ')'}"></a>
+    </p>
+    <p class="app-subtitle">Verifica que el peso bruto coincida con la licencia de tránsito.</p>
+    <div class="alert alert-error" th:if="${vehiculo.licenciaRequerida != null and not vehiculo.transportador.puedeConducir(vehiculo)}"
+         th:text="${'La licencia ' + vehiculo.transportador.licencia + ' del transportador no le permite conducir este vehículo (requiere ' + vehiculo.licenciaRequerida.name() + ').'}"></div>
+
+    <div class="alert alert-success" th:if="${exito}" th:text="${exito}"></div>
+    <div class="alert alert-error" th:if="${error}" th:text="${error}"></div>
+
+    <section class="app-section">
+        <div th:replace="~{fragments/documentos :: resumen-estado(${estadoDocumentos})}"></div>
+        <div th:replace="~{fragments/documentos :: revision(${tiposDocumento}, ${documentos})}"></div>
+    </section>
+
+    <p class="app-back-link"><a th:href="@{/admin/vehiculos}">&larr; Volver a vehículos</a></p>
+    <footer th:replace="~{fragments/footer-app :: footer}"></footer>
+</main>
+</body>
+</html>

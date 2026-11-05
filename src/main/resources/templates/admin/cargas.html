@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Cargas - BookTruck Admin</title>
+    <th:block th:replace="~{fragments/head :: css}"></th:block>
+</head>
+<body>
+<div th:replace="~{fragments/navbar-admin :: nav}"></div>
+
+<main class="app-content">
+    <h1>Cargas</h1>
+    <p class="app-subtitle">Todas las cargas publicadas en la plataforma.</p>
+
+    <form th:action="@{/admin/cargas}" method="get" class="filter-bar filter-bar-grid filter-bar-compacta">
+        <div class="filter-group">
+            <label for="estado">Estado</label>
+            <select id="estado" name="estado" class="form-control">
+                <option value="" th:selected="${estadoSeleccionado == null}">Todas</option>
+                <option value="PUBLICADA" th:selected="${estadoSeleccionado != null and estadoSeleccionado.name() == 'PUBLICADA'}">Publicada</option>
+                <option value="EN_PROCESO" th:selected="${estadoSeleccionado != null and estadoSeleccionado.name() == 'EN_PROCESO'}">En proceso</option>
+                <option value="ASIGNADA" th:selected="${estadoSeleccionado != null and estadoSeleccionado.name() == 'ASIGNADA'}">Asignada</option>
+                <option value="COMPLETADA" th:selected="${estadoSeleccionado != null and estadoSeleccionado.name() == 'COMPLETADA'}">Completada</option>
+                <option value="CANCELADA" th:selected="${estadoSeleccionado != null and estadoSeleccionado.name() == 'CANCELADA'}">Cancelada</option>
+                <option value="VENCIDA" th:selected="${estadoSeleccionado != null and estadoSeleccionado.name() == 'VENCIDA'}">Vencida</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label for="origen">Origen</label>
+            <select id="origen" name="origen" class="form-control">
+                <option value="">Todos</option>
+                <option th:each="o : ${origenes}" th:value="${o}" th:text="${o}" th:selected="${o == origen}"></option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label for="destino">Destino</label>
+            <select id="destino" name="destino" class="form-control">
+                <option value="">Todos</option>
+                <option th:each="d : ${destinos}" th:value="${d}" th:text="${d}" th:selected="${d == destino}"></option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label for="tipoMercancia">Mercancía</label>
+            <select id="tipoMercancia" name="tipoMercancia" class="form-control">
+                <option value="">Todas</option>
+                <option th:each="t : ${tiposMercancia}" th:value="${t}" th:text="${t}" th:selected="${t == tipoMercancia}"></option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label for="carroceria">Carrocería</label>
+            <select id="carroceria" name="carroceria" class="form-control">
+                <option value="">Todas</option>
+                <option th:each="c : ${carrocerias}" th:value="${c.name()}" th:text="${c.etiqueta}" th:selected="${c == carroceria}"></option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label for="empresaId">Empresa</label>
+            <select id="empresaId" name="empresaId" class="form-control">
+                <option value="">Todas</option>
+                <option th:each="e : ${empresas}" th:value="${e.id}" th:text="${e.razonSocial}" th:selected="${e.id == empresaId}"></option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label for="desde">Publicada desde</label>
+            <input type="date" id="desde" name="desde" class="form-control" th:value="${desde}">
+        </div>
+        <div class="filter-group">
+            <label for="hasta">Publicada hasta</label>
+            <input type="date" id="hasta" name="hasta" class="form-control" th:value="${hasta}">
+        </div>
+        <button type="submit" class="btn btn-primary">Filtrar</button>
+    </form>
+    <div th:replace="~{fragments/filtros :: resumen(${paginacion.total}, ${total}, ${hayFiltros}, '/admin/cargas', 'cargas')}"></div>
+
+    <section class="app-section">
+        <div class="table-responsive">
+        <table class="app-table" th:if="${not #lists.isEmpty(cargas)}">
+            <thead>
+            <tr>
+                <th>Ruta</th>
+                <th>Mercancía</th>
+                <th>Precio ofrecido</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="carga : ${cargas}">
+                <td>
+                    <span class="celda-principal" th:text="${carga.origen + ' → ' + carga.destino}"></span>
+                    <span class="celda-secundaria" th:text="${carga.empresa.razonSocial}"></span>
+                </td>
+                <td>
+                    <span class="celda-principal" th:text="${carga.tipoMercancia}"></span>
+                    <span class="celda-secundaria" th:text="${carga.peso + ' ton · ' + carga.carroceriaTexto}"></span>
+                </td>
+                <td class="celda-precio" th:text="${'$' + #numbers.formatDecimal(carga.precioOfrecido, 1, 'POINT', 0, 'COMMA')}"></td>
+                <td th:insert="~{fragments/badge :: pill(${carga.estado.name()})}"></td>
+                <td>
+                    <button type="button" class="btn-link js-ver-detalle"
+                            th:attr="data-detalle=${'detalle-carga-' + carga.id}"
+                            data-detalle-titulo="Detalles de la carga">Ver detalles</button>
+                    <template th:id="${'detalle-carga-' + carga.id}">
+                        <dl class="detalle-lista">
+                            <dt>Empresa</dt>
+                            <dd th:text="${carga.empresa.razonSocial}"></dd>
+                            <th:block th:replace="~{fragments/detalle-modal :: filas-carga(${carga})}"></th:block>
+                            <dt>Estado</dt>
+                            <dd th:insert="~{fragments/badge :: pill(${carga.estado.name()})}"></dd>
+                        </dl>
+                    </template>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+        </div>
+        <nav th:replace="~{fragments/paginacion :: pager(${paginacion})}"></nav>
+        <div class="empty-state" th:if="${#lists.isEmpty(cargas) and not hayFiltros}">
+            <p>No hay cargas publicadas.</p>
+        </div>
+        <th:block th:if="${#lists.isEmpty(cargas) and hayFiltros}">
+            <div th:replace="~{fragments/filtros :: sin-resultados('/admin/cargas')}"></div>
+        </th:block>
+    </section>
+    <footer th:replace="~{fragments/footer-app :: footer}"></footer>
+</main>
+<div th:replace="~{fragments/detalle-modal :: modal}"></div>
+<script th:src="@{/js/detalle-modal.js}"></script>
+</body>
+</html>

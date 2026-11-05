@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<small th:fragment="texto(motivo)"
+       th:if="${motivo != null}"
+       class="motivo-cancelacion"
+       th:text="${motivo.name() == 'CARGA_YA_ASIGNADA' ? 'Motivo: ya tenía carga asignada'
+             : (motivo.name() == 'ESPACIO_INSUFICIENTE' ? 'Motivo: no tenía espacio suficiente'
+             : (motivo.name() == 'CONDUCTOR_NO_COINCIDE' ? 'Motivo: el conductor no coincide con el del perfil'
+             : (motivo.name() == 'VEHICULO_NO_DISPONIBLE' ? 'Motivo: el vehículo no estaba disponible'
+             : 'Motivo: otro')))}">Motivo</small>
+</body>
+</html>

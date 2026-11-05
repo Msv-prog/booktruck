@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="nav">
+    <button type="button" class="app-sidebar-toggle" aria-label="Abrir menú"
+            onclick="document.getElementById('app-sidebar').classList.toggle('is-open')">&#9776;</button>
+    <aside id="app-sidebar" class="app-topbar">
+        <div class="app-topbar-brand">
+            <div class="brand-lockup">
+                <img th:src="@{/images/logobt.png}" alt="BookTruck" class="logo-img">
+                <span class="brand-name">BookTruck</span>
+            </div>
+        </div>
+        <nav class="app-topbar-menu">
+            <a th:href="@{/empresa/inicio}">
+                <span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8"></path><path d="M5 10v10h14V10"></path></svg></span>
+                Inicio
+            </a>
+            <a th:href="@{/empresa/perfil}">
+                <span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"></circle><path d="M4 21v-1a8 8 0 0 1 16 0v1"></path></svg></span>
+                Perfil
+            </a>
+            <a th:href="@{/empresa/cargas}">
+                <span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8l-9-5-9 5 9 5 9-5z"></path><path d="M3 8v8l9 5 9-5V8"></path><path d="M12 13v8"></path></svg></span>
+                Mis cargas
+            </a>
+            <a th:href="@{/empresa/cargas/nueva}">
+                <span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 8v8M8 12h8"></path></svg></span>
+                Publicar carga
+            </a>
+            <a th:href="@{/empresa/ofertas}" th:with="pendientes=${@ofertaService.contarPendientesPorEmpresa(empresa.id)}">
+                <span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41L11 3.83A2 2 0 0 0 9.59 3H4a1 1 0 0 0-1 1v5.59a2 2 0 0 0 .59 1.41l9.58 9.58a2 2 0 0 0 2.83 0l5.59-5.59a2 2 0 0 0 0-2.83z"></path><circle cx="7.5" cy="7.5" r="1.2"></circle></svg></span>
+                Ofertas
+                <span class="nav-badge" th:if="${pendientes} &gt; 0" th:text="${pendientes}"></span>
+            </a>
+            <a th:href="@{/empresa/viajes}" th:with="entregados=${@viajeService.contarEntregadosPorEmpresa(empresa.id)}">
+                <span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.1-7-11a7 7 0 0 1 14 0c0 4.9-7 11-7 11z"></path><circle cx="12" cy="10" r="2.5"></circle></svg></span>
+                Viajes
+                <span class="nav-badge" th:if="${entregados} &gt; 0" th:text="${entregados}"></span>
+            </a>
+            <a th:href="@{/empresa/notificaciones}" th:with="noLeidas=${@notificacionService.contarNoLeidas(empresa.usuario.id)}">
+                <span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.7 21a2 2 0 0 1-3.4 0"></path></svg></span>
+                Notificaciones
+                <span class="nav-badge" th:if="${noLeidas} &gt; 0" th:text="${noLeidas}"></span>
+            </a>
+            <a th:href="@{/empresa/calificaciones}">
+                <span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3 6.9 7.5.9-5.5 5.2 1.4 7.4L12 18.6 5.6 22.4 7 15 1.5 9.8l7.5-.9z"></path></svg></span>
+                Calificaciones
+            </a>
+        </nav>
+        <div class="app-topbar-user">
+            <a class="persona persona-menu" th:href="@{/empresa/perfil}">
+                <span th:replace="~{fragments/avatar :: avatar(${empresa.usuario}, ${empresa.iniciales}, 'chico')}"></span>
+                <span th:text="${empresa.razonSocial}"></span>
+            </a>
+            <button type="button" id="theme-toggle-btn" class="theme-toggle-btn" aria-label="Cambiar a modo oscuro" aria-pressed="false">
+                <span class="theme-toggle-icon" aria-hidden="true">
+                    <svg class="icon-sol" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path></svg>
+                    <svg class="icon-luna" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+                </span>
+                <span class="theme-toggle-texto">Modo oscuro</span>
+            </button>
+            <form th:action="@{/logout}" method="post" class="logout-form">
+                <button type="submit" class="btn-link"
+                        onclick="return confirm('¿Seguro que quieres cerrar sesión?');">Cerrar sesión</button>
+            </form>
+        </div>
+    </aside>
+    <th:block th:with="recientesCampana=${@notificacionService.recientes(empresa.usuario.id)},
+                       noLeidasCampana=${@notificacionService.contarNoLeidas(empresa.usuario.id)}">
+        <div th:replace="~{fragments/campana :: campana('/empresa', ${recientesCampana}, ${noLeidasCampana})}"></div>
+    </th:block>
+    <!-- El aviso se calcula fuera del fragmento: Thymeleaf no permite llamar beans dentro de ~{...} -->
+    <th:block th:with="avisoCuenta=${@verificacionService.avisoEmpresa(empresa)}">
+        <div th:replace="~{fragments/aviso-verificacion :: aviso(${avisoCuenta})}"></div>
+    </th:block>
+    <script th:src="@{/js/sidebar-active.js}"></script>
+    <script th:src="@{/js/tema-oscuro.js}"></script>
+    <script th:src="@{/js/campana.js}"></script>
+</div>
+</body>
+</html>

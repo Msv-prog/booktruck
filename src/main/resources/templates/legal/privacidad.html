@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Política de privacidad - BookTruck</title>
+    <th:block th:replace="~{fragments/head :: css}"></th:block>
+</head>
+<body>
+<header th:replace="~{fragments/publico :: nav}"></header>
+
+<main class="legal-page">
+    <h1>Política de privacidad</h1>
+    <p class="legal-actualizacion">Última actualización: 1 de octubre de 2026</p>
+    <div class="legal-aviso">
+        Documento de ejemplo elaborado con fines académicos. No ha sido revisado por un abogado y no constituye asesoría legal.
+    </div>
+
+    <h2>1. Responsable del tratamiento</h2>
+    <p>
+        BookTruck, con domicilio en Bogotá, Colombia, es responsable del tratamiento de los datos personales recolectados a
+        través de la plataforma. Contacto: <a href="mailto:contacto@booktruck.co">contacto@booktruck.co</a> ·
+        +57 601 555 0123.
+    </p>
+
+    <h2>2. Marco legal</h2>
+    <p>
+        Esta política se basa en la Ley 1581 de 2012 (protección de datos personales) y el Decreto 1377 de 2013, que la
+        reglamenta, así como en las demás normas colombianas que las modifiquen o complementen.
+    </p>
+
+    <h2>3. Datos que recolectamos</h2>
+    <ul>
+        <li><strong>Empresas:</strong> razón social, NIT, correo electrónico, teléfono y dirección.</li>
+        <li><strong>Transportadores:</strong> nombre completo, cédula, correo electrónico, teléfono, licencia de conducción y datos de sus vehículos (placa, tipo, marca y capacidad).</li>
+        <li><strong>Documentos de verificación</strong> que cada usuario sube desde su perfil: RUT, certificado de Cámara de Comercio y cédula del representante legal (empresas); cédula y licencia de conducción (transportadores); licencia de tránsito, SOAT y revisión técnico-mecánica de cada vehículo, con sus fechas de vencimiento.</li>
+        <li><strong>Ubicación del viaje</strong> reportada por el transportador mientras el viaje está en curso.</li>
+        <li><strong>Actividad en la plataforma:</strong> cargas, ofertas, viajes y calificaciones.</li>
+    </ul>
+
+    <h2>4. Para qué usamos tus datos</h2>
+    <ul>
+        <li>Crear y administrar tu cuenta y verificar tu identidad.</li>
+        <li>Conectar a empresas y transportadores y mostrar a cada parte la información necesaria del viaje (por ejemplo, el teléfono del transportador a la empresa que lo contrató).</li>
+        <li>Permitir el seguimiento del viaje en tiempo real.</li>
+        <li>Calcular comisiones y generar reportes internos de la plataforma.</li>
+        <li>Atender solicitudes, quejas y reclamos.</li>
+    </ul>
+
+    <h2>5. Tus derechos</h2>
+    <p>Como titular de los datos tienes derecho a:</p>
+    <ul>
+        <li>Conocer, actualizar y rectificar tus datos personales.</li>
+        <li>Solicitar prueba de la autorización que nos otorgaste.</li>
+        <li>Ser informado sobre el uso que le damos a tus datos.</li>
+        <li>Revocar la autorización o solicitar la supresión de tus datos, cuando no exista un deber legal de conservarlos.</li>
+        <li>Presentar quejas ante la Superintendencia de Industria y Comercio (SIC).</li>
+        <li>Acceder de forma gratuita a tus datos personales.</li>
+    </ul>
+
+    <h2>6. Cómo ejercer tus derechos</h2>
+    <p>
+        Escríbenos a <a href="mailto:contacto@booktruck.co">contacto@booktruck.co</a> indicando tu nombre, tu documento y
+        la solicitud. Puedes actualizar la mayoría de tus datos directamente desde tu perfil en la plataforma.
+    </p>
+
+    <h2>7. Con quién compartimos tus datos</h2>
+    <p>
+        No vendemos tus datos. Solo los compartimos con la otra parte de un viaje en lo necesario para realizarlo, y con
+        autoridades cuando la ley lo exija.
+    </p>
+
+    <h2>8. Seguridad</h2>
+    <p>
+        Las contraseñas se almacenan cifradas y el acceso a cada sección depende del rol del usuario. Los documentos de
+        verificación solo los pueden consultar su titular y los administradores de BookTruck.
+    </p>
+
+    <h2>9. Vigencia</h2>
+    <p>
+        Esta política rige desde la fecha indicada al inicio. Los datos se conservarán mientras tengas una cuenta activa y
+        durante el tiempo que exijan las obligaciones legales aplicables.
+    </p>
+
+    <p class="legal-volver"><a th:href="@{/}">&larr; Volver al inicio</a></p>
+</main>
+
+<footer th:replace="~{fragments/publico :: footer}"></footer>
+</body>
+</html>

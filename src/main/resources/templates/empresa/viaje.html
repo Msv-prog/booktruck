@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Viaje - BookTruck</title>
+    <th:block th:replace="~{fragments/head :: css}"></th:block>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+</head>
+<body>
+<div th:replace="~{fragments/navbar-empresa :: nav}"></div>
+
+<main class="app-content">
+    <nav th:replace="~{fragments/breadcrumb :: trail(@{/empresa/viajes}, 'Viajes', 'Viaje')}"></nav>
+    <h1 th:text="${'Viaje ' + viaje.carga.origen + ' → ' + viaje.carga.destino}">Viaje</h1>
+    <p class="app-subtitle">
+        <span th:insert="~{fragments/badge :: pill(${viaje.estado.name()})}"></span>
+        <span th:text="${viaje.carga.tipoMercancia + ' · ' + viaje.carga.peso + ' ton · ' + viaje.vehiculo.placa}"></span>
+    </p>
+
+    <div class="alert alert-success" th:if="${exito}" th:text="${exito}"></div>
+    <div class="alert alert-error" th:if="${error}" th:text="${error}"></div>
+
+    <div class="celda-acciones viaje-acciones">
+        <form th:if="${viaje.estado.name() == 'ENTREGADO'}" th:action="@{/empresa/viajes/{id}/confirmar(id=${viaje.id})}" method="post"
+              class="js-confirm" data-confirm-message="¿Revisaste la prueba de entrega y confirmas la recepción de esta carga? El viaje quedará finalizado.">
+            <button type="submit" class="btn btn-primary btn-auto">Confirmar recepción</button>
+        </form>
+        <form th:if="${viaje.estado.name() == 'PROGRAMADO'}" th:action="@{/empresa/viajes/{id}/cancelar(id=${viaje.id})}" method="post"
+              class="js-confirm" data-requiere-motivo data-confirm-message="¿Confirmas cancelar este viaje? Indica el motivo.">
+            <button type="submit" class="btn btn-secondary btn-auto">Cancelar viaje</button>
+        </form>
+        <a th:if="${viaje.estado.name() == 'FINALIZADO' and not calificado}" class="btn btn-primary btn-auto"
+           th:href="@{/empresa/viajes/{id}/calificar(id=${viaje.id})}">Calificar al transportador</a>
+    </div>
+    <th:block th:replace="~{fragments/viaje-detalle :: contenido(${viaje}, 'EMPRESA', ${puntos}, ${calificaciones})}"></th:block>
+
+    <p class="app-back-link"><a th:href="@{/empresa/viajes}">&larr; Volver a viajes</a></p>
+    <footer th:replace="~{fragments/footer-app :: footer}"></footer>
+</main>
+<div th:replace="~{fragments/confirm-modal :: modal}"></div>
+<script th:src="@{/js/confirm.js}"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script th:src="@{/js/mapa-seguimiento.js}"></script>
+</body>
+</html>
