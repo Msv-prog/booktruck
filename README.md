@@ -87,7 +87,7 @@ Para correr las pruebas de las reglas del negocio:
 mvnw test -Dtest=CategoriaLicenciaTest,CargaYViajeTest,VerificacionTest,ComisionTest
 ```
 
-En la carpeta `docs` está el [manual de usuario](docs/manual-usuario.md) y una [guía para hacer la demostración](docs/guion-demo.md).
+En la carpeta `docs` está el [manual de usuario](docs/manual-usuario.md).
 
 ## Autor
 
